@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Регистрация — Библиотека{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <h1>Регистрация</h1>
+    <p class="auth-sub">Аккаунт нужен, чтобы хранить прогресс чтения.</p>
+
+    <form method="post">
+      {% csrf_token %}
+      {% include 'partials/form_fields.html' %}
+      <button type="submit" class="primary-btn wide">Создать аккаунт</button>
+    </form>
+
+    <p class="auth-alt">Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a></p>
+  </div>
+</div>
+{% endblock %}

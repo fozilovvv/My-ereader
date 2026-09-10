@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static i18n l10n %}
+
+{% block title %}{{ chapter }} — {{ book.title }}{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/reader.css' %}">{% endblock %}
+
+{% block content %}
+<div class="reader-bar">
+  <div class="reader-bar-inner">
+    <a class="back" href="{{ book.get_absolute_url }}">← {{ book.title }}</a>
+
+    <div class="reader-bar-actions">
+      <span class="counter">{{ position }} / {{ total }}</span>
+      {% if user.is_authenticated %}
+        <button type="button" class="icon-btn" data-ai-action="summarize"
+                aria-label="Выжимка главы" title="Выжимка главы">✧</button>
+      {% endif %}
+      <button type="button" class="icon-btn" data-settings-toggle aria-label="Настройки чтения">Aa</button>
+      <button type="button" class="icon-btn" data-toc-toggle aria-label="{% translate 'Оглавление' %}">☰</button>
+    </div>
+  </div>
+  <div class="progress-line"><span style="width: {% widthratio position total 100 %}%"></span></div>
+</div>
+
+{% if user.is_authenticated %}
+  {# Данные для JS. Гостю этот блок не выводится — значит, скрипт просто ничего не делает. #}
+  <div data-progress hidden
+       data-url="{% url 'reader:save_progress' %}"
+       data-slug="{{ book.slug }}"
+       data-order="{{ chapter.order }}"
+       data-restore="{{ restore|unlocalize }}">{% csrf_token %}</div>
+{% endif %}
+
+{% if user.is_authenticated %}
+  <div data-ai hidden
+       data-url="{% url 'reader:ai_assist' %}"
+       data-slug="{{ book.slug }}"
+       data-order="{{ chapter.order }}">{% csrf_token %}</div>
+
+  {# Всплывает над выделенным текстом #}
+  <div class="sel-toolbar" data-selection-toolbar hidden>
+    <button type="button" data-quote-save class="accent">✎ {% translate "Цитата" %}</button>
+    <button type="button" data-ai-action="translate">{% translate "Перевести" %}</button>
+    <button type="button" data-ai-action="explain">{% translate "Объяснить" %}</button>
+  </div>
+
+  {# Настройки и уже сохранённые цитаты этой главы — для подсветки в тексте #}
+  <div data-quotes hidden
+       data-create-url="{% url 'reader:quote_create' %}"
+       data-slug="{{ book.slug }}"
+       data-order="{{ chapter.order }}">{% csrf_token %}</div>
+  {{ chapter_quotes|json_script:"chapter-quotes" }}
+
+  {# Панель с ответом #}
+  <div class="ai-panel" data-ai-panel hidden>
+    <div class="ai-panel-head">
+      <strong data-ai-title>Ответ</strong>
+      <button type="button" class="icon-btn" data-ai-close aria-label="Закрыть">✕</button>
+    </div>
+    <div class="ai-panel-body" data-ai-body></div>
+  </div>
+{% endif %}
+
+<div class="settings-panel" data-settings hidden>
+  <div class="setting">
+    <label>{% translate "Тема" %}</label>
+    <div class="seg" data-group="theme">
+      <button type="button" data-value="light">{% translate "Светлая" %}</button>
+      <button type="button" data-value="sepia">{% translate "Сепия" %}</button>
+      <button type="button" data-value="dark">{% translate "Тёмная" %}</button>
+    </div>
+  </div>
+
+  <div class="setting">
+    <label>{% translate "Шрифт" %}</label>
+    <div class="seg" data-group="font">
+      <button type="button" data-value="serif">{% translate "С засечками" %}</button>
+      <button type="button" data-value="sans">{% translate "Рубленый" %}</button>
+    </div>
+  </div>
+
+  <div class="setting">
+    <label>{% translate "Размер" %} <span data-readout="size"></span></label>
+    <input type="range" min="15" max="28" step="1" data-range="size">
+  </div>
+
+  <div class="setting">
+    <label>{% translate "Межстрочный интервал" %} <span data-readout="height"></span></label>
+    <input type="range" min="1.4" max="2.2" step="0.05" data-range="height">
+  </div>
+
+  <div class="setting">
+    <label>{% translate "Ширина колонки" %} <span data-readout="width"></span></label>
+    <input type="range" min="26" max="52" step="1" data-range="width">
+  </div>
+
+  <button type="button" class="settings-reset" data-settings-reset>{% translate "Сбросить настройки" %}</button>
+</div>
+
+<aside class="toc-drawer" data-toc hidden>
+  <div class="toc-drawer-head">
+    <strong>{% translate "Оглавление" %}</strong>
+    <button type="button" class="icon-btn" data-toc-toggle aria-label="Закрыть">✕</button>
+  </div>
+  <ol>
+    {% for item in chapters %}
+      <li{% if item.order == chapter.order %} class="current"{% endif %}>
+        <a href="{% url 'reader:chapter_read' book.slug item.order %}">
+          <span class="num">{{ forloop.counter }}</span>{{ item }}
+        </a>
+      </li>
+    {% endfor %}
+  </ol>
+</aside>
+
+<article class="reading">
+  <h1 class="chapter-title">{{ chapter }}</h1>
+  <div class="chapter-content">{{ chapter.content|safe }}</div>
+
+  <nav class="chapter-nav">
+    {% if prev_order is not None %}
+      <a class="nav-btn" href="{% url 'reader:chapter_read' book.slug prev_order %}">← {% translate "Назад" %}</a>
+    {% else %}<span></span>{% endif %}
+
+    {% if next_order is not None %}
+      <a class="nav-btn primary" href="{% url 'reader:chapter_read' book.slug next_order %}">{% translate "Дальше" %} →</a>
+    {% else %}
+      <a class="nav-btn" href="{{ book.get_absolute_url }}">{% translate "К оглавлению" %}</a>
+    {% endif %}
+  </nav>
+</article>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/reader.js' %}" defer></script>
+  <script src="{% static 'js/selection.js' %}" defer></script>
+  <script src="{% static 'js/reader-settings.js' %}" defer></script>
+  <script src="{% static 'js/progress.js' %}" defer></script>
+  <script src="{% static 'js/ai-assist.js' %}" defer></script>
+  <script src="{% static 'js/quotes.js' %}" defer></script>
+{% endblock %}

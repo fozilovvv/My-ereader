@@ -1,0 +1,124 @@
+{% load static i18n %}<!doctype html>
+<html lang="{{ LANGUAGE_CODE|default:"ru" }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% translate "Библиотека" %}{% endblock %}</title>
+
+  <script>
+    // Выполняется ДО отрисовки страницы: восстанавливаем тему,
+    // иначе при загрузке мелькнёт белый фон.
+    (function () {
+      try {
+        var saved = localStorage.getItem('theme');
+        if (saved) document.documentElement.setAttribute('data-theme', saved);
+      } catch (e) {}
+    })();
+  </script>
+
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="{% url 'reader:book_list' %}">
+      <span class="logo-mark">◗</span> {% translate "Библиотека" %}
+    </a>
+
+    <form class="search" action="{% url 'reader:book_list' %}" method="get" role="search">
+      <input type="search" name="q" placeholder="{% translate 'Поиск книг' %}" data-palette-open
+             value="{{ query|default:'' }}" aria-label="{% translate 'Поиск книг' %}">
+      <kbd class="search-hint">Ctrl K</kbd>
+    </form>
+
+    <div class="header-actions">
+      {% comment %}
+        Переключатель языка. Форма, а не ссылки: Django запоминает выбор
+        в сессии, а POST закрыт CSRF-токеном.
+      {% endcomment %}
+      <form class="lang-switch" action="{% url 'set_language' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        {% get_current_language as CURRENT_LANGUAGE %}
+        {% get_available_languages as AVAILABLE_LANGUAGES %}
+        {% for code, name in AVAILABLE_LANGUAGES %}
+          <button type="submit" name="language" value="{{ code }}" title="{{ name }}"
+                  class="{% if code == CURRENT_LANGUAGE %}on{% endif %}">{{ code|upper }}</button>
+        {% endfor %}
+      </form>
+
+      <button type="button" class="icon-btn" data-theme-toggle
+              aria-label="{% translate 'Сменить тему' %}">
+        <span data-theme-icon>◐</span>
+      </button>
+
+      {% comment %}
+        Заказывают книги читатели. Администратору эта кнопка ни к чему —
+        он добавляет книги сам, а поступившие заявки смотрит в «Заказах».
+      {% endcomment %}
+      {% if not user.is_staff %}
+        <a class="ghost-btn accent-btn" href="{% url 'reader:book_request' %}">
+          {% translate "Заказать книгу" %}
+        </a>
+      {% endif %}
+
+      {% if user.is_authenticated %}
+        {% if user.is_staff %}
+          <a class="ghost-btn with-badge" href="{% url 'reader:book_request_list' %}">
+            {% translate "Заказы" %}
+            {% if pending_orders_count %}<span class="badge">{{ pending_orders_count }}</span>{% endif %}
+          </a>
+          <a class="ghost-btn" href="{% url 'reader:book_upload' %}">+ {% translate "Книга" %}</a>
+          <a class="ghost-btn" href="/admin/">{% translate "Админка" %}</a>
+        {% endif %}
+        <span class="user-name">{{ user.username }}</span>
+        {# Выход только через POST: так чужая картинка на стороннем сайте не разлогинит тебя #}
+        <form action="{% url 'logout' %}" method="post" class="logout-form">
+          {% csrf_token %}
+          <button type="submit" class="ghost-btn">{% translate "Выйти" %}</button>
+        </form>
+      {% else %}
+        <a class="ghost-btn" href="{% url 'login' %}">{% translate "Войти" %}</a>
+        <a class="primary-btn small" href="{% url 'signup' %}">{% translate "Регистрация" %}</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+
+{% if messages %}
+  <div class="wrap">
+    <div class="messages">
+      {% for message in messages %}
+        <div class="message {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+
+<main>{% block content %}{% endblock %}</main>
+
+<footer class="site-footer">
+  <div class="wrap">{% translate "Личная библиотека · собрано на Django" %}</div>
+</footer>
+
+{# Палитра поиска: открывается по Ctrl+K на любой странице #}
+<div class="palette" data-palette hidden>
+  <div class="palette-box" role="dialog" aria-label="{% translate 'Поиск книг' %}" aria-modal="true">
+    <input type="search" class="palette-input" data-palette-input autocomplete="off"
+           placeholder="{% translate 'Название или автор…' %}" aria-label="{% translate 'Поиск книг' %}">
+    <div class="palette-results" data-palette-results></div>
+    <div class="palette-hint">
+      <span><kbd>↑</kbd><kbd>↓</kbd> {% translate "выбор" %}</span>
+      <span><kbd>Enter</kbd> {% translate "открыть" %}</span>
+      <span><kbd>Esc</kbd> {% translate "закрыть" %}</span>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'js/theme.js' %}" defer></script>
+<script src="{% static 'js/palette.js' %}" defer></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

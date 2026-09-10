@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% translate "Заказы" %} — {% translate "Библиотека" %}{% endblock %}
+
+{% block content %}
+<div class="wrap orders-page">
+
+  <div class="toolbar">
+    <div class="toolbar-title">
+      <h1>{% translate "Заказы" %}</h1>
+      <span class="muted">{{ total }}</span>
+    </div>
+  </div>
+
+  <div class="quote-filters">
+    <a class="side-link {% if not current_status %}active{% endif %}"
+       href="{% url 'reader:book_request_list' %}">{% translate "Все" %}
+       <span class="count">{{ total }}</span></a>
+    {% for tab in tabs %}
+      <a class="side-link {% if current_status == tab.value %}active{% endif %}"
+         href="?status={{ tab.value }}">{{ tab.label }}
+         <span class="count">{{ tab.count }}</span></a>
+    {% endfor %}
+  </div>
+
+  {% if orders %}
+    <div class="order-list">
+      {% for order in orders %}
+        <article class="order-card s-{{ order.status }}">
+          <div class="order-main">
+            <div class="order-title">{{ order }}</div>
+
+            <div class="order-meta">
+              {% if order.user %}{{ order.user.username }}{% else %}{% translate "гость" %}{% endif %}
+              · {{ order.created_at|date:"d.m.Y H:i" }}
+            </div>
+
+            {% if order.comment %}
+              <p class="order-comment">{{ order.comment }}</p>
+            {% endif %}
+          </div>
+
+          {# Смена статуса — обычная форма: одна кнопка, один POST, без JavaScript #}
+          <form method="post" class="order-form">
+            {% csrf_token %}
+            <input type="hidden" name="pk" value="{{ order.pk }}">
+            <a class="ghost-btn order-find"
+               href="{% url 'reader:catalog_find' %}?q={{ order.title|default:order.author|urlencode }}&order={{ order.pk }}">
+              {% translate "Найти" %}
+            </a>
+            <select name="status" class="select">
+              {% for value, label in statuses %}
+                <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="ghost-btn">{% translate "Сохранить" %}</button>
+          </form>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty">
+      <strong>{% translate "Заказов пока нет" %}</strong>
+      {% translate "Здесь появятся заявки читателей на книги." %}
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

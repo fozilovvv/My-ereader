@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Добавить книгу — Библиотека{% endblock %}
+
+{% block content %}
+<div class="wrap upload-page">
+
+  <div class="toolbar">
+    <div class="toolbar-title">
+      <h1>Добавить книгу</h1>
+      <span class="muted">файл разберётся на главы автоматически</span>
+    </div>
+  </div>
+
+  <div class="upload-grid">
+
+    <section class="upload-card">
+      <h2 class="block-title">Файлом с компьютера</h2>
+      {# enctype обязателен: без него браузер отправит имя файла, а не сам файл #}
+      <form method="post" action="{% url 'reader:book_upload' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% include 'partials/form_fields.html' %}
+        <button type="submit" class="primary-btn wide">Загрузить и разобрать</button>
+      </form>
+    </section>
+
+    <section class="upload-card">
+      <h2 class="block-title">По ссылке</h2>
+      <form method="post" action="{% url 'reader:book_import_url' %}">
+        {% csrf_token %}
+        {% include 'partials/form_fields.html' with form=url_form %}
+        <button type="submit" class="primary-btn wide">Скачать и разобрать</button>
+      </form>
+
+      <p class="upload-hint">
+        Проще всего — <a href="{% url 'reader:catalog_find' %}">поиск по каталогу</a>:
+        там 78 000 книг, скачивание в один клик.<br><br>
+        Здесь нужна <b>прямая ссылка на файл</b>, а не на страницу книги.
+        На сайте-источнике нажми правой кнопкой по ссылке «EPUB» и выбери
+        «Копировать адрес ссылки».
+      </p>
+    </section>
+
+  </div>
+
+  <section class="upload-sources">
+    <h2 class="block-title">Где брать книги легально</h2>
+    <ul>
+      <li><a href="https://www.gutenberg.org/" target="_blank" rel="noopener">Project Gutenberg</a> — около 75 000 книг, срок авторских прав истёк</li>
+      <li><a href="https://standardebooks.org/" target="_blank" rel="noopener">Standard Ebooks</a> — та же классика, вычитанная и красиво свёрстанная</li>
+      <li><a href="https://ru.wikisource.org/" target="_blank" rel="noopener">Викитека</a> — русская классика, экспорт в EPUB со страницы книги</li>
+      <li>Собственные купленные файлы без DRM</li>
+    </ul>
+    <p class="upload-hint">
+      Для массовой загрузки удобнее команда в терминале:
+      <code>python manage.py import_folder C:\Books</code>
+    </p>
+  </section>
+
+</div>
+{% endblock %}

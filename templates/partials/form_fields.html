@@ -1,0 +1,18 @@
+{% comment %}
+Общий кусок разметки формы. Подключается через include —
+в отличие от extends, который наследует целый шаблон,
+include вставляет фрагмент в любое место любой страницы.
+{% endcomment %}
+
+{% if form.non_field_errors %}
+  <div class="form-error">{{ form.non_field_errors|join:' ' }}</div>
+{% endif %}
+
+{% for field in form %}
+  <div class="field">
+    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {{ field }}
+    {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+    {% for error in field.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+  </div>
+{% endfor %}

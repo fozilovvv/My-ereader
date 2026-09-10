@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load i18n library_extras %}
+
+{% block title %}{% translate "Поиск по каталогу" %} — {% translate "Библиотека" %}{% endblock %}
+
+{% block content %}
+<div class="wrap catalog-page">
+
+  <div class="toolbar">
+    <div class="toolbar-title">
+      <h1>
+        {% if author_name %}{{ author_name }}
+        {% else %}{% translate "Поиск по каталогу" %}{% endif %}
+      </h1>
+      <span class="muted">
+        {% if author_name %}{% translate "произведений" %}: {{ results|length }}
+        {% else %}{% translate "книги в общественном достоянии" %}{% endif %}
+      </span>
+    </div>
+  </div>
+
+  {% if order %}
+    <div class="message">
+      {% translate "Ищем по заявке" %}: <b>{{ order }}</b>
+      — {% translate "после добавления заказ закроется сам" %}
+    </div>
+  {% endif %}
+
+  {% if author_name %}
+    <p class="upload-hint" style="margin:0 0 18px">
+      <a href="?source=wikisource&mode=authors&q={{ author_name|urlencode }}">←
+        {% translate "к списку авторов" %}</a>
+    </p>
+  {% else %}
+    {# Источники: у каждого свой сильный раздел — английская и русская классика #}
+    <div class="quote-filters source-tabs">
+      {% for item in sources %}
+        <a class="side-link {% if source == item.code %}active{% endif %}"
+           href="?source={{ item.code }}&q={{ query|urlencode }}{% if order %}&order={{ order.pk }}{% endif %}">
+          {{ item.label }}
+          <span class="count">{{ item.hint }}</span>
+        </a>
+      {% endfor %}
+    </div>
+
+    {% if source == 'wikisource' %}
+      <div class="quote-filters">
+        <a class="side-link {% if mode == 'works' %}active{% endif %}"
+           href="?source=wikisource&mode=works&q={{ query|urlencode }}">{% translate "Произведения" %}</a>
+        <a class="side-link {% if mode == 'authors' %}active{% endif %}"
+           href="?source=wikisource&mode=authors&q={{ query|urlencode }}">{% translate "Авторы" %}</a>
+      </div>
+    {% endif %}
+  {% endif %}
+
+  <form class="catalog-form" method="get">
+    <input type="hidden" name="source" value="{{ source }}">
+    <input type="hidden" name="mode" value="{{ mode }}">
+    {% if author_page %}<input type="hidden" name="author" value="{{ author_page }}">{% endif %}
+    {% if order %}<input type="hidden" name="order" value="{{ order.pk }}">{% endif %}
+
+    <input type="search" name="q" value="{{ query }}" autofocus
+           placeholder="{% if author_page %}{% translate 'Найти среди произведений' %}{% elif mode == 'authors' %}{% translate 'Фамилия писателя' %}{% else %}{% translate 'Название или автор' %}{% endif %}">
+
+    {% if source == 'gutenberg' %}
+      <select name="lang" class="select">
+        <option value="">{% translate "Все языки" %}</option>
+        {% for item in languages %}
+          <option value="{{ item.code }}" {% if language == item.code %}selected{% endif %}>
+            {{ item.code }} · {{ item.count }}
+          </option>
+        {% endfor %}
+      </select>
+    {% endif %}
+
+    <button type="submit" class="primary-btn">{% translate "Найти" %}</button>
+  </form>
+
+  {% if source == 'wikisource' and not author_page and not query %}
+    <div class="popular-authors">
+      <h3 class="side-title">{% translate "Частые авторы" %}</h3>
+      <div class="quote-filters">
+        {% for name in popular_authors %}
+          <a class="side-link" href="?source=wikisource&mode=authors&q={{ name|urlencode }}">{{ name }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  {% if error %}
+    <div class="empty"><strong>{{ error }}</strong></div>
+  {% elif results %}
+    <div class="catalog-grid">
+      {% for row in results %}
+        {% if row.kind == 'author' %}
+          <a class="catalog-card author-card" style="--hue: {{ row.title|cover_hue }}"
+             href="?source=wikisource&author={{ row.key|urlencode }}{% if order %}&order={{ order.pk }}{% endif %}">
+            <div class="catalog-cover"><span>{{ row.title|first|upper }}</span></div>
+            <div class="catalog-body">
+              <div class="catalog-title">{{ row.title }}</div>
+              <div class="catalog-meta">{% translate "смотреть произведения" %} →</div>
+            </div>
+          </a>
+        {% else %}
+          <article class="catalog-card{% if row.in_library %} have{% endif %}"
+                   style="--hue: {{ row.title|cover_hue }}">
+            <div class="catalog-cover">
+              {% if row.cover %}
+                <img src="{{ row.cover }}" alt="" loading="lazy" onerror="this.remove()">
+              {% endif %}
+              <span>{{ row.title|first|upper }}</span>
+            </div>
+
+            <div class="catalog-body">
+              <div class="catalog-title">{{ row.title }}</div>
+              <div class="catalog-author">{{ row.author|default:"—" }}</div>
+              <div class="catalog-meta">{{ row.note }} · {{ row.language }}</div>
+
+              {% if row.in_library %}
+                <span class="catalog-have">{% translate "Уже в библиотеке" %}</span>
+              {% else %}
+                <form method="post" class="catalog-add">
+                  {% csrf_token %}
+                  <input type="hidden" name="source" value="{{ row.source }}">
+                  <input type="hidden" name="key" value="{{ row.key }}">
+                  <input type="hidden" name="title" value="{{ row.title }}">
+                  <input type="hidden" name="q" value="{{ query }}">
+                  {% if order %}<input type="hidden" name="order" value="{{ order.pk }}">{% endif %}
+                  <button type="submit" class="primary-btn small">{% translate "Добавить" %}</button>
+                </form>
+              {% endif %}
+            </div>
+          </article>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% elif query or author_page %}
+    <div class="empty">
+      <strong>{% translate "Ничего не нашлось" %}</strong>
+      {% translate "Попробуй другое написание или поищи во втором источнике." %}
+    </div>
+  {% elif source == 'gutenberg' %}
+    <div class="empty">
+      <strong>{% translate "Введите название или автора" %}</strong>
+      {% translate "Книга скачается и разберётся на главы автоматически." %}
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static i18n library_extras %}
+
+{% block title %}Мои цитаты — Библиотека{% endblock %}
+
+{% block content %}
+<div class="wrap quotes-page">
+
+  <div class="toolbar">
+    <div class="toolbar-title">
+      <h1>{% translate "Мои цитаты" %}</h1>
+      <span class="muted">{{ total }}</span>
+    </div>
+  </div>
+
+  {% if books %}
+    <div class="quote-filters">
+      <a class="side-link {% if not current_book %}active{% endif %}"
+         href="{% url 'reader:quotes_list' %}">{% translate "Все книги" %}</a>
+      {% for item in books %}
+        <a class="side-link {% if current_book == item.slug %}active{% endif %}"
+           href="{% url 'reader:quotes_list' %}?book={{ item.slug }}">{{ item.title }}</a>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% for book, items in groups %}
+    <section class="quote-group">
+      <h2 class="block-title">
+        <a href="{{ book.get_absolute_url }}">{{ book.title }}</a>
+        <span class="muted">{{ items|length }}</span>
+      </h2>
+
+      <div class="quote-list">
+        {% for quote in items %}
+          <article class="quote-card" data-quote="{{ quote.pk }}"
+                   style="--hue: {{ book.title|cover_hue }}">
+            <blockquote>{{ quote.text }}</blockquote>
+
+            <div class="quote-note" data-note-view {% if not quote.note %}hidden{% endif %}>
+              {{ quote.note }}
+            </div>
+
+            <textarea class="quote-editor" data-note-editor hidden
+                      placeholder="Своя мысль об этом фрагменте…">{{ quote.note }}</textarea>
+
+            <div class="quote-foot">
+              {% if quote.chapter %}
+                <a class="quote-place"
+                   href="{% url 'reader:chapter_read' book.slug quote.chapter.order %}">
+                  {{ quote }} · перейти
+                </a>
+              {% else %}
+                <span class="quote-place muted">Глава недоступна</span>
+              {% endif %}
+
+              <div class="quote-tools">
+                <button type="button" data-note-toggle>
+                  {% if quote.note %}Изменить заметку{% else %}Заметка{% endif %}
+                </button>
+                <button type="button" data-note-save hidden>{% translate "Сохранить" %}</button>
+                <button type="button" class="danger" data-quote-delete>{% translate "Удалить" %}</button>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+  {% empty %}
+    <div class="empty">
+      <strong>{% translate "Цитат пока нет" %}</strong>
+      Открой любую книгу, выдели фрагмент и нажми «✎ Цитата».
+      <a href="{% url 'reader:book_list' %}">Перейти в каталог</a>
+    </div>
+  {% endfor %}
+
+</div>
+
+<div data-quotes-page hidden>{% csrf_token %}</div>
+{% endblock %}
+
+{% block extra_js %}<script src="{% static 'js/quotes-page.js' %}" defer></script>{% endblock %}

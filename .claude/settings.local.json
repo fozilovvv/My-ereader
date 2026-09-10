@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(& .\\\\.venv\\\\Scripts\\\\python.exe \"C:\\\\Users\\\\MSI\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-MSI-Desktop-1PROJECT\\\\ec67e036-ea93-436a-9f79-6ae773007efa\\\\scratchpad\\\\make_samples.py\")",
+      "PowerShell(& .\\\\.venv\\\\Scripts\\\\python.exe manage.py makemigrations --dry-run --verbosity 2)",
+      "PowerShell(& .\\\\.venv\\\\Scripts\\\\python.exe manage.py check)"
+    ]
+  }
+}

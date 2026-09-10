@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FictionBook xmlns="http://www.gribuser.ru/xml/fictionbook/2.0" xmlns:l="http://www.w3.org/1999/xlink">
+  <description><title-info>
+    <author><first-name>Ким</first-name><last-name>Ольховский</last-name></author>
+    <book-title>Хранитель тихой станции</book-title>
+    <annotation><p>Короткая история о вокзальной читальне.</p></annotation>
+    <lang>ru</lang>
+    <coverpage><image l:href="#cover.png"/></coverpage>
+  </title-info></description>
+  <body><section><title><p>Ключ от читальни</p></title><p>Ключ висел на гвозде у входа с самой весны.</p><p>Никто не помнил, кто его туда повесил.</p></section><section><title><p>Вторая полка</p></title><p>На второй полке стояли книги без названий.</p><empty-line/><p>Смотритель называл их «тихими».</p></section><section><title><p>Расписание</p></title><p>Поезда приходили дважды в сутки.</p></section></body>
+  <binary id="cover.png" content-type="image/png">iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==</binary>
+</FictionBook>

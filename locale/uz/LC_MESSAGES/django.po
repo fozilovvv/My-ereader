@@ -1,0 +1,318 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: library 1.0\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: uz\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+# --- Шапка сайта ---
+msgid "Библиотека"
+msgstr "Kutubxona"
+
+msgid "Поиск книг"
+msgstr "Kitob qidirish"
+
+msgid "Заказать книгу"
+msgstr "Kitob buyurtma qilish"
+
+msgid "Сменить тему"
+msgstr "Mavzuni almashtirish"
+
+msgid "Книга"
+msgstr "Kitob"
+
+msgid "Админка"
+msgstr "Boshqaruv"
+
+msgid "Выйти"
+msgstr "Chiqish"
+
+msgid "Войти"
+msgstr "Kirish"
+
+msgid "Регистрация"
+msgstr "Ro'yxatdan o'tish"
+
+msgid "Личная библиотека · собрано на Django"
+msgstr "Shaxsiy kutubxona · Django asosida"
+
+# --- Палитра поиска ---
+msgid "Название или автор…"
+msgstr "Nomi yoki muallifi…"
+
+msgid "выбор"
+msgstr "tanlash"
+
+msgid "открыть"
+msgstr "ochish"
+
+msgid "закрыть"
+msgstr "yopish"
+
+# --- Сайдбар ---
+msgid "Полки"
+msgstr "Javonlar"
+
+msgid "Все книги"
+msgstr "Barcha kitoblar"
+
+msgid "Читаю сейчас"
+msgstr "Hozir o'qiyapman"
+
+msgid "В планах"
+msgstr "Rejalarda"
+
+msgid "Прочитано"
+msgstr "O'qilgan"
+
+msgid "Избранное"
+msgstr "Saralangan"
+
+msgid "Мои цитаты"
+msgstr "Mening iqtiboslarim"
+
+msgid "Жанры"
+msgstr "Janrlar"
+
+msgid "Все жанры"
+msgstr "Barcha janrlar"
+
+msgid "Русские"
+msgstr "Ruscha"
+
+msgid "Английские"
+msgstr "Inglizcha"
+
+msgid "Моя статистика"
+msgstr "Mening statistikam"
+
+msgid "прочитано"
+msgstr "o'qilgan"
+
+msgid "в работе"
+msgstr "jarayonda"
+
+msgid "суммарно за чтением"
+msgstr "jami o'qishda"
+
+# --- Каталог ---
+msgid "Каталог"
+msgstr "Katalog"
+
+msgid "Сначала новые"
+msgstr "Avval yangilari"
+
+msgid "По названию"
+msgstr "Nomi bo'yicha"
+
+msgid "По автору"
+msgstr "Muallifi bo'yicha"
+
+msgid "По прогрессу"
+msgstr "Jarayoni bo'yicha"
+
+msgid "Сначала длинные"
+msgstr "Avval uzunlari"
+
+msgid "Сначала короткие"
+msgstr "Avval qisqalari"
+
+msgid "Продолжить чтение"
+msgstr "O'qishni davom ettirish"
+
+msgid "Вся библиотека"
+msgstr "Butun kutubxona"
+
+msgid "Здесь пока пусто"
+msgstr "Bu yerda hozircha bo'sh"
+
+msgid "Библиотека пока пуста"
+msgstr "Kutubxona hozircha bo'sh"
+
+# --- Страница книги ---
+msgid "В каталог"
+msgstr "Katalogga"
+
+msgid "Сначала"
+msgstr "Boshidan"
+
+msgid "Начать чтение"
+msgstr "O'qishni boshlash"
+
+msgid "Читаю"
+msgstr "O'qiyapman"
+
+msgid "О книге"
+msgstr "Kitob haqida"
+
+msgid "Оглавление"
+msgstr "Mundarija"
+
+# --- Читалка ---
+msgid "Цитата"
+msgstr "Iqtibos"
+
+msgid "Перевести"
+msgstr "Tarjima qilish"
+
+msgid "Объяснить"
+msgstr "Tushuntirish"
+
+msgid "Тема"
+msgstr "Mavzu"
+
+msgid "Светлая"
+msgstr "Yorug'"
+
+msgid "Сепия"
+msgstr "Sepiya"
+
+msgid "Тёмная"
+msgstr "Qorong'i"
+
+msgid "Шрифт"
+msgstr "Shrift"
+
+msgid "С засечками"
+msgstr "Serifli"
+
+msgid "Рубленый"
+msgstr "Serifsiz"
+
+msgid "Размер"
+msgstr "O'lcham"
+
+msgid "Межстрочный интервал"
+msgstr "Qatorlar oralig'i"
+
+msgid "Ширина колонки"
+msgstr "Ustun kengligi"
+
+msgid "Сбросить настройки"
+msgstr "Sozlamalarni tiklash"
+
+msgid "Назад"
+msgstr "Orqaga"
+
+msgid "Дальше"
+msgstr "Keyingi"
+
+msgid "К оглавлению"
+msgstr "Mundarijaga"
+
+# --- Цитаты и заказы ---
+msgid "Цитат пока нет"
+msgstr "Hozircha iqtiboslar yo'q"
+
+msgid "Удалить"
+msgstr "O'chirish"
+
+msgid "Сохранить"
+msgstr "Saqlash"
+
+msgid "чего не хватает в библиотеке?"
+msgstr "kutubxonada nima yetishmayapti?"
+
+msgid "Отправить заказ"
+msgstr "Buyurtmani yuborish"
+
+msgid "Мои заказы"
+msgstr "Mening buyurtmalarim"
+
+msgid "Категории"
+msgstr "Kategoriyalar"
+
+msgid "Все категории"
+msgstr "Barcha kategoriyalar"
+
+msgid "Заказы"
+msgstr "Buyurtmalar"
+
+msgid "Все"
+msgstr "Barchasi"
+
+msgid "гость"
+msgstr "mehmon"
+
+msgid "Заказов пока нет"
+msgstr "Hozircha buyurtmalar yo'q"
+
+msgid "Здесь появятся заявки читателей на книги."
+msgstr "Bu yerda o'quvchilarning kitob so'rovlari paydo bo'ladi."
+
+msgid "Поиск по каталогу"
+msgstr "Katalogdan qidirish"
+
+msgid "книг в общественном достоянии"
+msgstr "ta erkin kitob"
+
+msgid "Найти"
+msgstr "Topish"
+
+msgid "Добавить"
+msgstr "Qo'shish"
+
+msgid "Все языки"
+msgstr "Barcha tillar"
+
+msgid "Уже в библиотеке"
+msgstr "Allaqachon kutubxonada"
+
+msgid "Ничего не нашлось"
+msgstr "Hech narsa topilmadi"
+
+msgid "Введите название или автора"
+msgstr "Nomi yoki muallifini kiriting"
+
+msgid "Книга скачается и разберётся на главы автоматически."
+msgstr "Kitob yuklanadi va boblarga avtomatik ajratiladi."
+
+msgid "Попробуй другое написание: в каталоге имена записаны по-английски."
+msgstr "Boshqacha yozib ko'ring: katalogda ismlar inglizcha yozilgan."
+
+msgid "Ищем по заявке"
+msgstr "So'rov bo'yicha qidiramiz"
+
+msgid "после добавления заказ закроется сам"
+msgstr "qo'shilgandan keyin buyurtma o'zi yopiladi"
+
+msgid "Пополнение"
+msgstr "To'ldirish"
+
+msgid "Загрузить файл"
+msgstr "Fayl yuklash"
+
+msgid "книги в общественном достоянии"
+msgstr "erkin foydalanishdagi kitoblar"
+
+msgid "Название или автор"
+msgstr "Nomi yoki muallifi"
+
+msgid "Попробуй другое написание или поищи во втором источнике."
+msgstr "Boshqacha yozing yoki ikkinchi manbadan qidiring."
+
+msgid "произведений"
+msgstr "asarlar"
+
+msgid "к списку авторов"
+msgstr "mualliflar ro'yxatiga"
+
+msgid "Произведения"
+msgstr "Asarlar"
+
+msgid "Авторы"
+msgstr "Mualliflar"
+
+msgid "Найти среди произведений"
+msgstr "Asarlar orasidan qidirish"
+
+msgid "Фамилия писателя"
+msgstr "Yozuvchi familiyasi"
+
+msgid "Частые авторы"
+msgstr "Mashhur mualliflar"
+
+msgid "смотреть произведения"
+msgstr "asarlarni ko'rish"

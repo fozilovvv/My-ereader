@@ -1,0 +1,318 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: library 1.0\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# --- Шапка сайта ---
+msgid "Библиотека"
+msgstr "Library"
+
+msgid "Поиск книг"
+msgstr "Search books"
+
+msgid "Заказать книгу"
+msgstr "Request a book"
+
+msgid "Сменить тему"
+msgstr "Switch theme"
+
+msgid "Книга"
+msgstr "Book"
+
+msgid "Админка"
+msgstr "Admin"
+
+msgid "Выйти"
+msgstr "Sign out"
+
+msgid "Войти"
+msgstr "Sign in"
+
+msgid "Регистрация"
+msgstr "Sign up"
+
+msgid "Личная библиотека · собрано на Django"
+msgstr "Personal library · built with Django"
+
+# --- Палитра поиска ---
+msgid "Название или автор…"
+msgstr "Title or author…"
+
+msgid "выбор"
+msgstr "select"
+
+msgid "открыть"
+msgstr "open"
+
+msgid "закрыть"
+msgstr "close"
+
+# --- Сайдбар ---
+msgid "Полки"
+msgstr "Shelves"
+
+msgid "Все книги"
+msgstr "All books"
+
+msgid "Читаю сейчас"
+msgstr "Reading now"
+
+msgid "В планах"
+msgstr "Planned"
+
+msgid "Прочитано"
+msgstr "Finished"
+
+msgid "Избранное"
+msgstr "Favourites"
+
+msgid "Мои цитаты"
+msgstr "My quotes"
+
+msgid "Жанры"
+msgstr "Genres"
+
+msgid "Все жанры"
+msgstr "All genres"
+
+msgid "Русские"
+msgstr "Russian"
+
+msgid "Английские"
+msgstr "English"
+
+msgid "Моя статистика"
+msgstr "My stats"
+
+msgid "прочитано"
+msgstr "finished"
+
+msgid "в работе"
+msgstr "in progress"
+
+msgid "суммарно за чтением"
+msgstr "total time reading"
+
+# --- Каталог ---
+msgid "Каталог"
+msgstr "Catalogue"
+
+msgid "Сначала новые"
+msgstr "Newest first"
+
+msgid "По названию"
+msgstr "By title"
+
+msgid "По автору"
+msgstr "By author"
+
+msgid "По прогрессу"
+msgstr "By progress"
+
+msgid "Сначала длинные"
+msgstr "Longest first"
+
+msgid "Сначала короткие"
+msgstr "Shortest first"
+
+msgid "Продолжить чтение"
+msgstr "Continue reading"
+
+msgid "Вся библиотека"
+msgstr "Whole library"
+
+msgid "Здесь пока пусто"
+msgstr "Nothing here yet"
+
+msgid "Библиотека пока пуста"
+msgstr "The library is empty"
+
+# --- Страница книги ---
+msgid "В каталог"
+msgstr "Back to catalogue"
+
+msgid "Сначала"
+msgstr "From the start"
+
+msgid "Начать чтение"
+msgstr "Start reading"
+
+msgid "Читаю"
+msgstr "Reading"
+
+msgid "О книге"
+msgstr "About the book"
+
+msgid "Оглавление"
+msgstr "Contents"
+
+# --- Читалка ---
+msgid "Цитата"
+msgstr "Quote"
+
+msgid "Перевести"
+msgstr "Translate"
+
+msgid "Объяснить"
+msgstr "Explain"
+
+msgid "Тема"
+msgstr "Theme"
+
+msgid "Светлая"
+msgstr "Light"
+
+msgid "Сепия"
+msgstr "Sepia"
+
+msgid "Тёмная"
+msgstr "Dark"
+
+msgid "Шрифт"
+msgstr "Font"
+
+msgid "С засечками"
+msgstr "Serif"
+
+msgid "Рубленый"
+msgstr "Sans-serif"
+
+msgid "Размер"
+msgstr "Size"
+
+msgid "Межстрочный интервал"
+msgstr "Line spacing"
+
+msgid "Ширина колонки"
+msgstr "Column width"
+
+msgid "Сбросить настройки"
+msgstr "Reset settings"
+
+msgid "Назад"
+msgstr "Back"
+
+msgid "Дальше"
+msgstr "Next"
+
+msgid "К оглавлению"
+msgstr "To contents"
+
+# --- Цитаты и заказы ---
+msgid "Цитат пока нет"
+msgstr "No quotes yet"
+
+msgid "Удалить"
+msgstr "Delete"
+
+msgid "Сохранить"
+msgstr "Save"
+
+msgid "чего не хватает в библиотеке?"
+msgstr "what's missing from the library?"
+
+msgid "Отправить заказ"
+msgstr "Send request"
+
+msgid "Мои заказы"
+msgstr "My requests"
+
+msgid "Категории"
+msgstr "Categories"
+
+msgid "Все категории"
+msgstr "All categories"
+
+msgid "Заказы"
+msgstr "Requests"
+
+msgid "Все"
+msgstr "All"
+
+msgid "гость"
+msgstr "guest"
+
+msgid "Заказов пока нет"
+msgstr "No requests yet"
+
+msgid "Здесь появятся заявки читателей на книги."
+msgstr "Reader requests for books will appear here."
+
+msgid "Поиск по каталогу"
+msgstr "Catalogue search"
+
+msgid "книг в общественном достоянии"
+msgstr "public domain books"
+
+msgid "Найти"
+msgstr "Search"
+
+msgid "Добавить"
+msgstr "Add"
+
+msgid "Все языки"
+msgstr "All languages"
+
+msgid "Уже в библиотеке"
+msgstr "Already in library"
+
+msgid "Ничего не нашлось"
+msgstr "Nothing found"
+
+msgid "Введите название или автора"
+msgstr "Enter a title or author"
+
+msgid "Книга скачается и разберётся на главы автоматически."
+msgstr "The book will be downloaded and split into chapters automatically."
+
+msgid "Попробуй другое написание: в каталоге имена записаны по-английски."
+msgstr "Try a different spelling: the catalogue lists names in English."
+
+msgid "Ищем по заявке"
+msgstr "Searching for request"
+
+msgid "после добавления заказ закроется сам"
+msgstr "the request will close itself once added"
+
+msgid "Пополнение"
+msgstr "Add books"
+
+msgid "Загрузить файл"
+msgstr "Upload a file"
+
+msgid "книги в общественном достоянии"
+msgstr "public domain books"
+
+msgid "Название или автор"
+msgstr "Title or author"
+
+msgid "Попробуй другое написание или поищи во втором источнике."
+msgstr "Try a different spelling or search the other source."
+
+msgid "произведений"
+msgstr "works"
+
+msgid "к списку авторов"
+msgstr "back to authors"
+
+msgid "Произведения"
+msgstr "Works"
+
+msgid "Авторы"
+msgstr "Authors"
+
+msgid "Найти среди произведений"
+msgstr "Search within works"
+
+msgid "Фамилия писателя"
+msgstr "Author surname"
+
+msgid "Частые авторы"
+msgstr "Popular authors"
+
+msgid "смотреть произведения"
+msgstr "view works"

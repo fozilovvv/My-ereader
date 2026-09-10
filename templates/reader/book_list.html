@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load static i18n l10n library_extras %}
+
+{% block title %}Каталог — Библиотека{% endblock %}
+
+{% block content %}
+<div class="layout">
+
+  {# ---------- Сайдбар: на ноутбуке слева, на телефоне лентой сверху ---------- #}
+  <aside class="sidebar">
+    <nav class="side-group">
+      <h3 class="side-title">{% translate "Полки" %}</h3>
+      <ul class="side-list">
+        <li><a class="side-link {% if not current_shelf %}active{% endif %}"
+               href="{% query_replace shelf='' %}"><i class="ic">▤</i>{% translate "Все книги" %}</a></li>
+        <li><a class="side-link {% if current_shelf == 'reading' %}active{% endif %}"
+               href="{% query_replace shelf='reading' %}"><i class="ic">◐</i>{% translate "Читаю сейчас" %}
+               <span class="count">{{ shelf_counts.reading }}</span></a></li>
+        <li><a class="side-link {% if current_shelf == 'planned' %}active{% endif %}"
+               href="{% query_replace shelf='planned' %}"><i class="ic">◷</i>{% translate "В планах" %}
+               <span class="count">{{ shelf_counts.planned }}</span></a></li>
+        <li><a class="side-link {% if current_shelf == 'finished' %}active{% endif %}"
+               href="{% query_replace shelf='finished' %}"><i class="ic">✓</i>{% translate "Прочитано" %}
+               <span class="count">{{ shelf_counts.finished }}</span></a></li>
+        <li><a class="side-link fav {% if current_shelf == 'favorite' %}active{% endif %}"
+               href="{% query_replace shelf='favorite' %}"><i class="ic">♥</i>{% translate "Избранное" %}
+               <span class="count">{{ shelf_counts.favorite }}</span></a></li>
+        {% if user.is_authenticated %}
+          <li><a class="side-link" href="{% url 'reader:quotes_list' %}"><i class="ic">✎</i>{% translate "Мои цитаты" %}</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+
+    {% comment %}
+      Категории разложены по языкам: русские книги и английские живут в
+      разных разделах, иначе один и тот же жанр двоился бы в списке.
+      <details> раскрывает список без единой строки JavaScript.
+    {% endcomment %}
+    <nav class="side-group">
+      <h3 class="side-title">{% translate "Категории" %}</h3>
+      <ul class="side-list">
+        {# Это ссылка-сброс, а не состояние: подсвечивать её незачем #}
+        <li><a class="side-link" href="{% query_replace category='' %}"><i class="ic">◇</i>{% translate "Все категории" %}</a></li>
+      </ul>
+
+      {% for group in category_groups %}
+        <details class="side-fold" {% if group.open %}open{% endif %}>
+          <summary>{% translate group.label %}<span class="count">{{ group.items|length }}</span></summary>
+          <ul class="side-list">
+            {% for category in group.items %}
+              <li><a class="side-link {% if current_category == category.slug %}active{% endif %}"
+                     href="{% query_replace category=category.slug %}">{{ category.name }}
+                     <span class="count">{{ category.total }}</span></a></li>
+            {% endfor %}
+          </ul>
+        </details>
+      {% endfor %}
+    </nav>
+
+    {% if user.is_staff %}
+      <nav class="side-group">
+        <h3 class="side-title">{% translate "Пополнение" %}</h3>
+        <ul class="side-list">
+          <li><a class="side-link" href="{% url 'reader:catalog_find' %}"><i class="ic">⌕</i>{% translate "Поиск по каталогу" %}</a></li>
+          <li><a class="side-link" href="{% url 'reader:book_upload' %}"><i class="ic">↑</i>{% translate "Загрузить файл" %}</a></li>
+          <li><a class="side-link" href="{% url 'reader:book_request_list' %}"><i class="ic">✉</i>{% translate "Заказы" %}
+              {% if pending_orders_count %}<span class="count">{{ pending_orders_count }}</span>{% endif %}</a></li>
+        </ul>
+      </nav>
+    {% endif %}
+
+    {% if stats %}
+      <div class="side-group side-stats">
+        <h3 class="side-title">{% translate "Моя статистика" %}</h3>
+        <div class="stat-tiles">
+          <div class="stat"><b>{{ stats.finished }}</b><span>{% translate "прочитано" %}</span></div>
+          <div class="stat"><b>{{ stats.reading }}</b><span>{% translate "в работе" %}</span></div>
+        </div>
+        <div class="stat wide">
+          <b>{{ stats.chars|reading_time }}</b>
+          <span>{% translate "суммарно за чтением" %}</span>
+        </div>
+      </div>
+    {% endif %}
+  </aside>
+
+  {# ---------- Основная колонка ---------- #}
+  <div class="content">
+
+    <div class="toolbar">
+      <div class="toolbar-title">
+        <h1>
+          {% if query %}Поиск: «{{ query }}»
+          {% elif current_shelf == 'favorite' %}Избранное
+          {% elif current_shelf == 'reading' %}Читаю сейчас
+          {% elif current_shelf == 'planned' %}В планах
+          {% elif current_shelf == 'finished' %}Прочитано
+          {% else %}{% translate "Каталог" %}{% endif %}
+        </h1>
+        <span class="muted">{{ total_books }}</span>
+      </div>
+
+      <div class="toolbar-tools">
+        <select class="select" onchange="location = this.value">
+          <option value="{% query_replace sort='new' %}" {% if current_sort == 'new' %}selected{% endif %}>{% translate "Сначала новые" %}</option>
+          <option value="{% query_replace sort='title' %}" {% if current_sort == 'title' %}selected{% endif %}>{% translate "По названию" %}</option>
+          <option value="{% query_replace sort='author' %}" {% if current_sort == 'author' %}selected{% endif %}>{% translate "По автору" %}</option>
+          <option value="{% query_replace sort='progress' %}" {% if current_sort == 'progress' %}selected{% endif %}>{% translate "По прогрессу" %}</option>
+          <option value="{% query_replace sort='long' %}" {% if current_sort == 'long' %}selected{% endif %}>{% translate "Сначала длинные" %}</option>
+          <option value="{% query_replace sort='short' %}" {% if current_sort == 'short' %}selected{% endif %}>{% translate "Сначала короткие" %}</option>
+        </select>
+
+        <div class="seg view-switch">
+          <button type="button" data-view="grid" title="Сеткой">▦</button>
+          <button type="button" data-view="list" title="Списком">☰</button>
+        </div>
+      </div>
+    </div>
+
+    {% if reading %}
+      <section class="shelf">
+        <h2 class="shelf-title">{% translate "Продолжить чтение" %}</h2>
+        <div class="book-grid">
+          {% for book in reading %}{% include 'reader/_book_card.html' %}{% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    {% if books %}
+      {% if reading %}<h2 class="shelf-title">{% translate "Вся библиотека" %}</h2>{% endif %}
+      <div class="book-grid" data-books>
+        {% for book in books %}{% include 'reader/_book_card.html' %}{% endfor %}
+      </div>
+    {% else %}
+      <div class="empty">
+        {% if query or current_category or current_shelf %}
+          <strong>{% translate "Здесь пока пусто" %}</strong>
+          Ни одна книга не подходит под выбранные условия.
+          <a href="{% url 'reader:book_list' %}">Сбросить фильтры</a>
+        {% else %}
+          <strong>{% translate "Библиотека пока пуста" %}</strong>
+          {% if user.is_staff %}
+            <a href="{% url 'reader:book_upload' %}">Загрузи первую книгу</a>
+          {% else %}
+            Книги добавляет администратор.
+          {% endif %}
+        {% endif %}
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+
+{% if user.is_authenticated %}<div data-shelf-config hidden>{% csrf_token %}</div>{% endif %}
+{% endblock %}
+
+{% block extra_js %}<script src="{% static 'js/library.js' %}" defer></script>{% endblock %}

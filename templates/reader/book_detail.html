@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static i18n l10n library_extras %}
+
+{% block title %}{{ book.title }} — Библиотека{% endblock %}
+
+{% block content %}
+{# ---------- Обложка-герой ---------- #}
+<section class="hero" style="--hue: {{ book.title|cover_hue }}">
+  {% if book.cover %}
+    <div class="hero-bg" style="background-image: url('{{ book.cover.url }}')"></div>
+  {% else %}
+    <div class="hero-bg hero-bg-flat"></div>
+  {% endif %}
+
+  <div class="wrap hero-inner">
+    <div class="hero-cover">
+      {% if book.cover %}
+        <img src="{{ book.cover.url }}" alt="Обложка: {{ book.title }}">
+      {% else %}
+        <div class="cover-fallback"><span>{{ book.title|first|upper }}</span></div>
+      {% endif %}
+      {% if progress %}
+        <div class="card-progress"><span style="width: {{ progress.percent|unlocalize }}%"></span></div>
+      {% endif %}
+    </div>
+
+    <div class="hero-text">
+      <a class="hero-back" href="{% url 'reader:book_list' %}">← {% translate "В каталог" %}</a>
+
+      <h1>{{ book.title }}</h1>
+      <p class="hero-author">{{ book.author|default:'Автор не указан' }}</p>
+
+      <div class="facts">
+        <span class="chip">{{ chapters|length }} глав</span>
+        <span class="chip">Читать {{ book.total_chars|reading_time }}</span>
+        {% if progress %}
+          <span class="chip accent">{{ progress.percent|floatformat:0|unlocalize }}% · {{ book|time_left }}</span>
+        {% endif %}
+        {% if quotes_count %}
+          <a class="chip link" href="{% url 'reader:quotes_list' %}?book={{ book.slug }}">✎ Цитат: {{ quotes_count }}</a>
+        {% endif %}
+        {% for category in book.categories.all %}
+          <a class="chip link" href="{% url 'reader:book_list' %}?category={{ category.slug }}">{{ category.name }}</a>
+        {% endfor %}
+      </div>
+
+      {% if chapters %}
+        <div class="detail-actions" data-book="{{ book.slug }}">
+          {% if progress and progress.chapter %}
+            <a class="primary-btn" href="{% url 'reader:chapter_read' book.slug progress.chapter.order %}">{% translate "Продолжить чтение" %}</a>
+            <a class="ghost-btn" href="{% url 'reader:chapter_read' book.slug 0 %}">{% translate "Сначала" %}</a>
+          {% else %}
+            <a class="primary-btn" href="{% url 'reader:chapter_read' book.slug 0 %}">{% translate "Начать чтение" %}</a>
+          {% endif %}
+
+          {% if user.is_authenticated %}
+            <div class="seg status-seg">
+              <button type="button" data-shelf="planned"
+                      class="{% if shelf_entry.status == 'planned' %}on{% endif %}">{% translate "В планах" %}</button>
+              <button type="button" data-shelf="reading"
+                      class="{% if shelf_entry.status == 'reading' %}on{% endif %}">{% translate "Читаю" %}</button>
+              <button type="button" data-shelf="finished"
+                      class="{% if shelf_entry.status == 'finished' %}on{% endif %}">{% translate "Прочитано" %}</button>
+            </div>
+            <button type="button" class="fav-btn {% if shelf_entry.is_favorite %}on{% endif %}"
+                    data-shelf="favorite" title="В избранное">♥</button>
+          {% else %}
+            <span class="progress-note"><a href="{% url 'login' %}">Войди</a>, чтобы сохранять прогресс</span>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{# ---------- Описание и оглавление ---------- #}
+<div class="wrap book-body">
+  {% if book.description %}
+    <section class="book-about">
+      <h2 class="block-title">{% translate "О книге" %}</h2>
+      <p class="description">{{ book.description }}</p>
+    </section>
+  {% endif %}
+
+  <section class="toc">
+    <h2 class="block-title">{% translate "Оглавление" %} <span class="muted">{{ chapters|length }}</span></h2>
+    <ol class="toc-columns">
+      {% for chapter in chapters %}
+        <li{% if progress and progress.chapter_id == chapter.id %} class="current"{% endif %}>
+          <a href="{% url 'reader:chapter_read' book.slug chapter.order %}">
+            <span class="num">{{ forloop.counter }}</span>
+            <span class="ch-title">{{ chapter }}</span>
+            <span class="size">{{ chapter.char_count|reading_time }}</span>
+          </a>
+        </li>
+      {% empty %}
+        <li><a>Книга ещё не разобрана на главы.</a></li>
+      {% endfor %}
+    </ol>
+  </section>
+</div>
+
+{% if user.is_authenticated %}<div data-shelf-config hidden>{% csrf_token %}</div>{% endif %}
+{% endblock %}
+
+{% block extra_js %}<script src="{% static 'js/library.js' %}" defer></script>{% endblock %}

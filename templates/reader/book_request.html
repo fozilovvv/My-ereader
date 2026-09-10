@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Заказать книгу — Библиотека{% endblock %}
+
+{% block content %}
+<div class="wrap request-page">
+
+  <div class="toolbar">
+    <div class="toolbar-title">
+      <h1>{% translate "Заказать книгу" %}</h1>
+      <span class="muted">{% translate "чего не хватает в библиотеке?" %}</span>
+    </div>
+  </div>
+
+  <div class="request-grid">
+    <section class="upload-card">
+      <p class="upload-hint" style="margin-top:0">
+        Помнишь только автора или жанр — этого достаточно.
+        Заполни хотя бы одно поле.
+      </p>
+
+      <form method="post">
+        {% csrf_token %}
+        {% include 'partials/form_fields.html' %}
+        <button type="submit" class="primary-btn wide">{% translate "Отправить заказ" %}</button>
+      </form>
+    </section>
+
+    {% if my_requests %}
+      <section class="upload-card">
+        <h2 class="block-title">{% translate "Мои заказы" %}</h2>
+        <ul class="request-list">
+          {% for order in my_requests %}
+            <li>
+              <span class="request-name">{{ order }}</span>
+              <span class="request-status s-{{ order.status }}">{{ order.get_status_display }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
