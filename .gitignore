@@ -14,3 +14,5 @@ staticfiles/
 # Редакторы
 .vscode/
 .idea/
+
+data.json
