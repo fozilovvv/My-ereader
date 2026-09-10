@@ -16,3 +16,7 @@ staticfiles/
 .idea/
 
 data.json
+
+media.zip
+
+media_small.zip
