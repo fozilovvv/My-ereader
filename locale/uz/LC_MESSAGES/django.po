@@ -316,3 +316,346 @@ msgstr "Mashhur mualliflar"
 
 msgid "смотреть произведения"
 msgstr "asarlarni ko'rish"
+
+# --- Права доступа, аналитика и сообщения (добавлено) ---
+
+msgid "Эта страница доступна после входа."
+msgstr "Bu sahifa faqat tizimga kirgandan keyin ochiladi."
+
+msgid "Войди, чтобы читать книги и сохранять прогресс."
+msgstr "Kitob oʻqish va toʻxtagan joyni saqlash uchun tizimga kiring."
+
+msgid "Войди, чтобы заказать книгу — так мы сможем ответить тебе."
+msgstr "Kitob buyurtma qilish uchun kiring — shunda sizga javob bera olamiz."
+
+msgid "Заказ принят — посмотрим, что можно найти."
+msgstr "Buyurtma qabul qilindi — nima topilishini koʻramiz."
+
+msgid "«%(title)s» готова к чтению — глав: %(count)d"
+msgstr "«%(title)s» oʻqishga tayyor — boblar: %(count)d"
+
+msgid "«%(title)s» добавлена — глав: %(count)d"
+msgstr "«%(title)s» qoʻshildi — boblar: %(count)d"
+
+msgid "Книга не выбрана."
+msgstr "Kitob tanlanmadi."
+
+msgid "Не удалось скачать: %s"
+msgstr "Yuklab boʻlmadi: %s"
+
+msgid "Файл скачался, но разобрать не вышло: %s"
+msgstr "Fayl yuklandi, lekin uni ajratib boʻlmadi: %s"
+
+msgid "Заказ не найден."
+msgstr "Buyurtma topilmadi."
+
+msgid "Неизвестный статус."
+msgstr "Nomaʼlum holat."
+
+msgid "меньше минуты"
+msgstr "bir daqiqadan kam"
+
+msgid "%(count)d мин"
+msgstr "%(count)d daqiqa"
+
+msgid "%(count)d ч"
+msgstr "%(count)d soat"
+
+msgid "%(hours)d ч %(minutes)d мин"
+msgstr "%(hours)d soat %(minutes)d daqiqa"
+
+msgid "Новая"
+msgstr "Yangi"
+
+msgid "В работе"
+msgstr "Ishlanmoqda"
+
+msgid "Добавлена"
+msgstr "Qoʻshildi"
+
+msgid "Отклонена"
+msgstr "Rad etildi"
+
+msgid "Ожидает разбора"
+msgstr "Ajratish kutilmoqda"
+
+msgid "Готова к чтению"
+msgstr "Oʻqishga tayyor"
+
+msgid "Ошибка разбора"
+msgstr "Ajratishda xato"
+
+msgid "День активности"
+msgstr "Faollik kuni"
+
+msgid "Активность пользователей"
+msgstr "Foydalanuvchilar faolligi"
+
+msgid "Меню"
+msgstr "Menyu"
+
+msgid "Поиск: «%(query)s»"
+msgstr "Qidiruv: «%(query)s»"
+
+msgid "Ни одна книга не подходит под выбранные условия."
+msgstr "Tanlangan shartlarga birorta kitob mos kelmadi."
+
+msgid "Сбросить фильтры"
+msgstr "Filtrlarni tozalash"
+
+msgid "Загрузи первую книгу"
+msgstr "Birinchi kitobni yuklang"
+
+msgid "Книги добавляет администратор."
+msgstr "Kitoblarni administrator qoʻshadi."
+
+msgid "Автор не указан"
+msgstr "Muallif koʻrsatilmagan"
+
+msgid "В избранное"
+msgstr "Sevimlilarga"
+
+msgid "Войти и читать"
+msgstr "Kirish va oʻqish"
+
+msgid "Чтение, полки и цитаты — после входа."
+msgstr "Oʻqish, javonlar va iqtiboslar — kirgandan keyin."
+
+msgid "глав"
+msgstr "bob"
+
+msgid "Читать"
+msgstr "Oʻqish"
+
+msgid "Цитат"
+msgstr "Iqtiboslar"
+
+msgid "Книга ещё не разобрана на главы."
+msgstr "Kitob hali boblarga ajratilmagan."
+
+msgid "Аналитика"
+msgstr "Tahlil"
+
+msgid "Посещаемость"
+msgstr "Tashriflar"
+
+msgid "за %(days)s дней"
+msgstr "%(days)s kun ichida"
+
+msgid "В админке"
+msgstr "Boshqaruv panelida"
+
+msgid "читателей"
+msgstr "oʻquvchi"
+
+msgid "заходов"
+msgstr "tashrif"
+
+msgid "всего на сайте"
+msgstr "saytda jami"
+
+msgid "в среднем на человека"
+msgstr "kishi boshiga oʻrtacha"
+
+msgid "Сейчас на сайте"
+msgstr "Hozir saytda"
+
+msgid "По дням"
+msgstr "Kunlar boʻyicha"
+
+msgid "Читатели"
+msgstr "Oʻquvchilar"
+
+msgid "Читатель"
+msgstr "Oʻquvchi"
+
+msgid "Время на сайте"
+msgstr "Saytdagi vaqt"
+
+msgid "Заходов"
+msgstr "Tashriflar"
+
+msgid "Дней"
+msgstr "Kunlar"
+
+msgid "За один заход"
+msgstr "Bitta tashrifda"
+
+msgid "Пока тихо"
+msgstr "Hozircha jim"
+
+msgid "За выбранный период никто не заходил."
+msgstr "Tanlangan davrda hech kim kirmadi."
+
+msgid "Сегодня"
+msgstr "Bugun"
+
+msgid "Последняя страница"
+msgstr "Oxirgi sahifa"
+
+msgid "Последний сигнал"
+msgstr "Oxirgi signal"
+
+msgid "Браузер сообщает о присутствии раз в %(seconds)s секунд и только когда вкладка открыта на экране."
+msgstr "Brauzer har %(seconds)s soniyada va faqat oyna ekranda ochiq boʻlganda belgi yuboradi."
+
+msgid "Время считает сервер — по разнице между сигналами, поэтому вкладка, забытая на ночь, не превращается в часы чтения."
+msgstr "Vaqtni server hisoblaydi — signallar orasidagi farq boʻyicha, shuning uchun tunga unutilgan oyna oʻqish soatlariga aylanmaydi."
+
+# --- Названия жанров ---
+
+msgid "Классика"
+msgstr "Klassika"
+
+msgid "Classics"
+msgstr "Klassika"
+
+msgid "Современная проза"
+msgstr "Zamonaviy nasr"
+
+msgid "Modern prose"
+msgstr "Zamonaviy nasr"
+
+msgid "Фантастика"
+msgstr "Fantastika"
+
+msgid "Science fiction"
+msgstr "Fantastika"
+
+msgid "Фэнтези"
+msgstr "Fentezi"
+
+msgid "Fantasy"
+msgstr "Fentezi"
+
+msgid "Детектив"
+msgstr "Detektiv"
+
+msgid "Detective"
+msgstr "Detektiv"
+
+msgid "Триллер"
+msgstr "Triller"
+
+msgid "Thriller"
+msgstr "Triller"
+
+msgid "Ужасы"
+msgstr "Qoʻrqinchli"
+
+msgid "Horror"
+msgstr "Qoʻrqinchli"
+
+msgid "Романтика"
+msgstr "Romantika"
+
+msgid "Romance"
+msgstr "Romantika"
+
+msgid "Приключения"
+msgstr "Sarguzasht"
+
+msgid "Adventure"
+msgstr "Sarguzasht"
+
+msgid "Драматургия"
+msgstr "Dramaturgiya"
+
+msgid "Drama"
+msgstr "Dramaturgiya"
+
+msgid "Поэзия"
+msgstr "Sheʼriyat"
+
+msgid "Poetry"
+msgstr "Sheʼriyat"
+
+msgid "Юмор"
+msgstr "Hazil"
+
+msgid "Humour"
+msgstr "Hazil"
+
+msgid "Мифы и фольклор"
+msgstr "Miflar va folklor"
+
+msgid "Myths and folklore"
+msgstr "Miflar va folklor"
+
+msgid "Детское"
+msgstr "Bolalar uchun"
+
+msgid "Children"
+msgstr "Bolalar uchun"
+
+msgid "Нон-фикшн"
+msgstr "Badiiy boʻlmagan"
+
+msgid "Non-fiction"
+msgstr "Badiiy boʻlmagan"
+
+msgid "История"
+msgstr "Tarix"
+
+msgid "History"
+msgstr "Tarix"
+
+msgid "Биографии"
+msgstr "Biografiyalar"
+
+msgid "Biography"
+msgstr "Biografiyalar"
+
+msgid "Психология"
+msgstr "Psixologiya"
+
+msgid "Psychology"
+msgstr "Psixologiya"
+
+msgid "Философия"
+msgstr "Falsafa"
+
+msgid "Philosophy"
+msgstr "Falsafa"
+
+msgid "Политика"
+msgstr "Siyosat"
+
+msgid "Politics"
+msgstr "Siyosat"
+
+msgid "Религия"
+msgstr "Din"
+
+msgid "Religion"
+msgstr "Din"
+
+msgid "Наука"
+msgstr "Fan"
+
+msgid "Science"
+msgstr "Fan"
+
+msgid "Бизнес"
+msgstr "Biznes"
+
+msgid "Business"
+msgstr "Biznes"
+
+msgid "Технологии"
+msgstr "Texnologiyalar"
+
+msgid "Technology"
+msgstr "Texnologiyalar"
+
+msgid "Учебное"
+msgstr "Oʻquv"
+
+msgid "Education"
+msgstr "Oʻquv"
+
+msgid "Справочники"
+msgstr "Maʼlumotnomalar"
+
+msgid "Reference"
+msgstr "Maʼlumotnomalar"

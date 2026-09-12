@@ -1,9 +1,19 @@
+"""Модели библиотеки — описание того, что хранится в базе.
+
+Подписи статусов и названия разделов обёрнуты в gettext_lazy (`_`).
+Lazy — «ленивый» — значит, что строка переводится не при запуске Django,
+а в момент показа, когда уже известен язык читателя. Обычный gettext здесь
+не годится: модели читаются один раз при старте процесса, и перевод намертво
+застыл бы на том языке, который был активен в ту секунду.
+"""
 from pathlib import Path
 
 from django.conf import settings
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 
 from . import search
 
@@ -17,8 +27,8 @@ class Category(models.Model):
     """
 
     class Language(models.TextChoices):
-        RU = 'ru', 'Русские'
-        EN = 'en', 'Английские'
+        RU = 'ru', _('Русские')
+        EN = 'en', _('Английские')
 
     code = models.SlugField('Код жанра', max_length=40, default='other')
     language = models.CharField('Язык', max_length=5, choices=Language, default=Language.RU)
@@ -28,8 +38,8 @@ class Category(models.Model):
     position = models.PositiveIntegerField('Порядок в списке', default=100)
 
     class Meta:
-        verbose_name = 'Категория'
-        verbose_name_plural = 'Категории'
+        verbose_name = _('Категория')
+        verbose_name_plural = _('Категории')
         ordering = ['language', 'position', 'name']
         constraints = [
             models.UniqueConstraint(fields=['code', 'language'], name='unique_category_per_language'),
@@ -48,9 +58,9 @@ class Book(models.Model):
     """Одна книга в библиотеке."""
 
     class Status(models.TextChoices):
-        PENDING = 'pending', 'Ожидает разбора'
-        READY = 'ready', 'Готова к чтению'
-        ERROR = 'error', 'Ошибка разбора'
+        PENDING = 'pending', _('Ожидает разбора')
+        READY = 'ready', _('Готова к чтению')
+        ERROR = 'error', _('Ошибка разбора')
 
     # blank=True: при загрузке EPUB/FB2 название подтянется из файла само.
     title = models.CharField('Название', max_length=255, blank=True)
@@ -93,8 +103,8 @@ class Book(models.Model):
     created_at = models.DateTimeField('Добавлена', auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Книга'
-        verbose_name_plural = 'Книги'
+        verbose_name = _('Книга')
+        verbose_name_plural = _('Книги')
         ordering = ['-created_at']
 
     def __str__(self):
@@ -140,8 +150,8 @@ class Chapter(models.Model):
     char_count = models.PositiveIntegerField('Символов', default=0)
 
     class Meta:
-        verbose_name = 'Глава'
-        verbose_name_plural = 'Главы'
+        verbose_name = _('Глава')
+        verbose_name_plural = _('Главы')
         ordering = ['order']
         constraints = [
             models.UniqueConstraint(fields=['book', 'order'], name='unique_chapter_order'),
@@ -174,8 +184,8 @@ class ReadingProgress(models.Model):
     updated_at = models.DateTimeField('Обновлено', auto_now=True)
 
     class Meta:
-        verbose_name = 'Прогресс чтения'
-        verbose_name_plural = 'Прогресс чтения'
+        verbose_name = _('Прогресс чтения')
+        verbose_name_plural = _('Прогресс чтения')
         ordering = ['-updated_at']
         constraints = [
             models.UniqueConstraint(fields=['user', 'book'], name='unique_progress_per_book'),
@@ -199,9 +209,9 @@ class Shelf(models.Model):
     FINISHED_PERCENT = 99
 
     class Status(models.TextChoices):
-        PLANNED = 'planned', 'В планах'
-        READING = 'reading', 'Читаю сейчас'
-        FINISHED = 'finished', 'Прочитано'
+        PLANNED = 'planned', _('В планах')
+        READING = 'reading', _('Читаю сейчас')
+        FINISHED = 'finished', _('Прочитано')
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Пользователь',
@@ -216,8 +226,8 @@ class Shelf(models.Model):
     updated_at = models.DateTimeField('Обновлено', auto_now=True)
 
     class Meta:
-        verbose_name = 'Полка'
-        verbose_name_plural = 'Полки пользователей'
+        verbose_name = _('Полка')
+        verbose_name_plural = _('Полки пользователей')
         ordering = ['-updated_at']
         constraints = [
             models.UniqueConstraint(fields=['user', 'book'], name='unique_shelf_per_book'),
@@ -251,8 +261,8 @@ class Quote(models.Model):
     created_at = models.DateTimeField('Сохранена', auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Цитата'
-        verbose_name_plural = 'Цитаты'
+        verbose_name = _('Цитата')
+        verbose_name_plural = _('Цитаты')
         ordering = ['-created_at']
         indexes = [
             # По этой паре идёт выборка цитат при открытии главы.
@@ -268,10 +278,10 @@ class BookRequest(models.Model):
     """Заявка читателя: какую книгу он хочет видеть в библиотеке."""
 
     class Status(models.TextChoices):
-        NEW = 'new', 'Новая'
-        IN_WORK = 'in_work', 'В работе'
-        DONE = 'done', 'Добавлена'
-        REJECTED = 'rejected', 'Отклонена'
+        NEW = 'new', _('Новая')
+        IN_WORK = 'in_work', _('В работе')
+        DONE = 'done', _('Добавлена')
+        REJECTED = 'rejected', _('Отклонена')
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Заказчик',
@@ -290,8 +300,8 @@ class BookRequest(models.Model):
     created_at = models.DateTimeField('Создана', auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Заказ'
-        verbose_name_plural = 'Заказы'
+        verbose_name = _('Заказ')
+        verbose_name_plural = _('Заказы')
         ordering = ['-created_at']
 
     def __str__(self):
@@ -318,8 +328,8 @@ class CatalogEntry(models.Model):
     search_text = models.CharField('Поисковая строка', max_length=1000, db_index=True)
 
     class Meta:
-        verbose_name = 'Запись каталога'
-        verbose_name_plural = 'Каталог Gutenberg'
+        verbose_name = _('Запись каталога')
+        verbose_name_plural = _('Каталог Gutenberg')
         ordering = ['title']
 
     def __str__(self):
@@ -334,3 +344,107 @@ class CatalogEntry(models.Model):
     def cover_url(self) -> str:
         return (f'https://www.gutenberg.org/cache/epub/'
                 f'{self.gutenberg_id}/pg{self.gutenberg_id}.cover.medium.jpg')
+
+
+class ActivityDay(models.Model):
+    """Сколько времени пользователь провёл на сайте за один конкретный день.
+
+    Почему одна строка на человека в день, а не запись на каждый сигнал:
+    сигнал приходит каждые 30 секунд — это 120 строк в час на пользователя.
+    За месяц активного чтения накопились бы десятки тысяч строк, которые всё
+    равно пришлось бы складывать при каждом показе отчёта. Складываем сразу:
+    база остаётся маленькой, а отчёт считается мгновенно.
+    """
+
+    # Как часто браузер шлёт сигнал. Это же число читает JS (см. base.html) —
+    # здесь единственное место, где оно задано.
+    HEARTBEAT_SECONDS = 30
+
+    # Тишина дольше 15 минут считается новым заходом, а не продолжением
+    # прежнего: человек ушёл пить чай, закрыл ноутбук, вернулся вечером.
+    VISIT_GAP = 15 * 60
+
+    # За один сигнал засчитываем не больше двух интервалов. Без этой границы
+    # вкладка, провисевшая в фоне всю ночь, подарила бы читателю восемь часов
+    # «чтения» одним сигналом под утро.
+    MAX_STEP = HEARTBEAT_SECONDS * 2
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, verbose_name=_('Пользователь'),
+        on_delete=models.CASCADE, related_name='activity',
+    )
+    date = models.DateField(_('Дата'), db_index=True)
+
+    seconds = models.PositiveIntegerField(_('Время на сайте, секунд'), default=0)
+    visits = models.PositiveIntegerField(_('Заходов за день'), default=1)
+    beats = models.PositiveIntegerField(_('Сигналов получено'), default=0)
+
+    last_page = models.CharField(_('Последняя страница'), max_length=300, blank=True)
+    last_seen = models.DateTimeField(_('Последний сигнал'), auto_now=True)
+
+    class Meta:
+        verbose_name = _('День активности')
+        verbose_name_plural = _('Активность пользователей')
+        ordering = ['-date', '-seconds']
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'date'], name='unique_activity_per_day'),
+        ]
+
+    def __str__(self):
+        return f'{self.user} · {self.date} — {self.human_time}'
+
+    @property
+    def minutes(self) -> int:
+        return self.seconds // 60
+
+    @property
+    def human_time(self) -> str:
+        """«2 ч 15 мин» — читаемая длительность вместо голых секунд."""
+        return format_duration(self.seconds)
+
+    @classmethod
+    def record(cls, user, page: str = ''):
+        """Принимает один сигнал от браузера и наращивает счётчики.
+
+        Время считаем по разнице с прошлым сигналом, а не «плюс 30 секунд»:
+        браузер мог задержать таймер, а мог и вовсе пропасть на полчаса.
+        Разница — это то, что произошло на самом деле, а MAX_STEP не даёт
+        зачесть пропавшие полчаса как время на сайте.
+        """
+        entry, created = cls.objects.get_or_create(
+            user=user, date=timezone.localdate(),
+            defaults={'visits': 1, 'beats': 1, 'last_page': page[:300]},
+        )
+        if created:
+            return entry
+
+        gap = (timezone.now() - entry.last_seen).total_seconds()
+
+        if gap > cls.VISIT_GAP:
+            entry.visits += 1          # вернулся после долгого перерыва
+        else:
+            entry.seconds += int(min(gap, cls.MAX_STEP))
+
+        entry.beats += 1
+        entry.last_page = page[:300]
+        entry.save(update_fields=['seconds', 'visits', 'beats', 'last_page', 'last_seen'])
+        return entry
+
+
+def format_duration(seconds) -> str:
+    """Секунды в «2 ч 15 мин». Нужна и модели, и страницам отчётов."""
+    try:
+        seconds = int(seconds or 0)
+    except (TypeError, ValueError):
+        seconds = 0
+
+    minutes = seconds // 60
+    if minutes < 1:
+        return _('меньше минуты')
+    if minutes < 60:
+        return _('%(count)d мин') % {'count': minutes}
+
+    hours, rest = divmod(minutes, 60)
+    if rest == 0:
+        return _('%(count)d ч') % {'count': hours}
+    return _('%(hours)d ч %(minutes)d мин') % {'hours': hours, 'minutes': rest}

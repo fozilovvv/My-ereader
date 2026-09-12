@@ -1,5 +1,5 @@
 """Данные, которые нужны в шапке на каждой странице."""
-from .models import BookRequest
+from .models import ActivityDay, BookRequest
 
 
 def pending_orders(request):
@@ -18,3 +18,14 @@ def pending_orders(request):
             status=BookRequest.Status.NEW,
         ).count(),
     }
+
+
+def heartbeat_settings(request):
+    """Интервал сигнала присутствия — из модели, а не из числа в шаблоне.
+
+    Одно значение задано в ActivityDay.HEARTBEAT_SECONDS: по нему сервер
+    считает время и по нему же браузер шлёт сигналы. Держать два одинаковых
+    числа в Python и в JavaScript — верный способ однажды их рассогласовать
+    и получить статистику, которая врёт вдвое.
+    """
+    return {'heartbeat_seconds': ActivityDay.HEARTBEAT_SECONDS}

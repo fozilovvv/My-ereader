@@ -2,18 +2,24 @@
 import json
 import re
 
+from datetime import timedelta
+from functools import wraps
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
 from django.core.cache import cache
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.html import strip_tags
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from pathlib import Path
@@ -23,10 +29,32 @@ from django.core.files.base import ContentFile
 
 from . import ai, fetching, search, sources
 from .forms import BookRequestForm, BookUploadForm, BookUrlForm, SignUpForm
-from .models import (Book, BookRequest, CatalogEntry, Category, Chapter, Quote,
-                     ReadingProgress, Shelf)
+from .models import (ActivityDay, Book, BookRequest, CatalogEntry, Category,
+                     Chapter, Quote, ReadingProgress, Shelf, format_duration)
 from .parsing import PARSERS, ParseError, import_book
 from .templatetags.library_extras import cover_hue, reading_time
+
+
+def members_only(reason='Эта страница доступна после входа.'):
+    """Гость смотрит каталог и карточки книг. Всё остальное — после входа.
+
+    От готового @login_required отличается одним: перед отправкой на форму
+    входа человек видит объяснение, почему его туда отправили. Пустая форма
+    входа без причины выглядит как ошибка сайта, а не как правило.
+
+    Причину переводим здесь, во время запроса, а не при импорте модуля:
+    модуль читается один раз при старте сервера, и язык тогда ещё неизвестен.
+    """
+    def decorator(view):
+        @wraps(view)
+        def wrapper(request, *args, **kwargs):
+            if request.user.is_authenticated:
+                return view(request, *args, **kwargs)
+            messages.info(request, _(reason))
+            # next= возвращает человека ровно туда, куда он шёл.
+            return redirect_to_login(request.get_full_path())
+        return wrapper
+    return decorator
 
 
 def _progress_map(user) -> dict:
@@ -190,8 +218,9 @@ def book_detail(request, slug):
     })
 
 
+@members_only('Войди, чтобы читать книги и сохранять прогресс.')
 def chapter_read(request, slug, order):
-    """Читалка: одна глава книги."""
+    """Читалка: одна глава книги. Гостю здесь делать нечего."""
     book = get_object_or_404(Book, slug=slug)
     chapter = get_object_or_404(Chapter, book=book, order=order)
     total = book.chapters.count()
@@ -232,7 +261,8 @@ def _finish_import(request, book: Book, form, field: str):
         form.add_error(field, f'Файл сохранён, но разобрать не вышло: {error}')
         return None
 
-    messages.success(request, f'«{book.title}» готова к чтению — глав: {created}')
+    messages.success(request, _('«%(title)s» готова к чтению — глав: %(count)d')
+                     % {'title': book.title, 'count': created})
     return redirect(book.get_absolute_url())
 
 
@@ -420,27 +450,25 @@ def quotes_list(request):
     })
 
 
+@members_only('Войди, чтобы заказать книгу — так мы сможем ответить тебе.')
 def book_request(request):
     """Заказ книги: читатель просит добавить то, чего в библиотеке нет."""
     if request.method == 'POST':
         form = BookRequestForm(request.POST)
         if form.is_valid():
             order = form.save(commit=False)
-            # Гостям тоже разрешаем заказывать, поэтому user может остаться пустым.
-            if request.user.is_authenticated:
-                order.user = request.user
+            order.user = request.user
             order.save()
-            messages.success(request, 'Заказ принят — посмотрим, что можно найти.')
+            # gettext, а не готовая строка: сообщение переводится в момент
+            # показа — на том языке, который выбрал сам читатель.
+            messages.success(request, _('Заказ принят — посмотрим, что можно найти.'))
             return redirect('reader:book_list')
     else:
         form = BookRequestForm()
 
     return render(request, 'reader/book_request.html', {
         'form': form,
-        'my_requests': (
-            BookRequest.objects.filter(user=request.user)[:10]
-            if request.user.is_authenticated else []
-        ),
+        'my_requests': BookRequest.objects.filter(user=request.user)[:10],
     })
 
 
@@ -458,9 +486,9 @@ def book_request_list(request):
         order = BookRequest.objects.filter(pk=request.POST.get('pk')).first()
         status = request.POST.get('status', '')
         if order is None:
-            messages.error(request, 'Заказ не найден.')
+            messages.error(request, _('Заказ не найден.'))
         elif status not in BookRequest.Status.values:
-            messages.error(request, 'Неизвестный статус.')
+            messages.error(request, _('Неизвестный статус.'))
         else:
             order.status = status
             order.save(update_fields=['status'])
@@ -549,7 +577,7 @@ def _import_from_source(request):
     source = request.POST.get('source', sources.GUTENBERG)
     key = request.POST.get('key', '').strip()
     if not key:
-        messages.error(request, 'Книга не выбрана.')
+        messages.error(request, _('Книга не выбрана.'))
         return redirect('reader:catalog_find')
 
     back = (f"{reverse('reader:catalog_find')}?source={quote_plus(source)}"
@@ -558,7 +586,7 @@ def _import_from_source(request):
     try:
         data, filename = fetching.fetch(sources.download_url(source, key))
     except fetching.FetchError as error:
-        messages.error(request, f'Не удалось скачать: {error}')
+        messages.error(request, _('Не удалось скачать: %s') % error)
         return redirect(back)
 
     # Викитека отдаёт файл без говорящего имени — собираем его из названия.
@@ -575,7 +603,7 @@ def _import_from_source(request):
         created = import_book(book)
     except Exception as error:
         book.delete()
-        messages.error(request, f'Файл скачался, но разобрать не вышло: {error}')
+        messages.error(request, _('Файл скачался, но разобрать не вышло: %s') % error)
         return redirect(back)
 
     # Викитека не хранит жанров: это архив классики в общественном
@@ -593,7 +621,8 @@ def _import_from_source(request):
         order.status = BookRequest.Status.DONE
         order.save(update_fields=['status'])
 
-    messages.success(request, f'«{book.title}» добавлена — глав: {created}')
+    messages.success(request, _('«%(title)s» добавлена — глав: %(count)d')
+                     % {'title': book.title, 'count': created})
     return redirect(book.get_absolute_url())
 
 
@@ -663,7 +692,7 @@ def _sync_shelf(user, book: Book, percent: float) -> None:
     «В планах» это не ломает: у непрочитанной книги прогресса нет,
     и эта функция для неё просто не вызывается.
     """
-    shelf, _ = Shelf.objects.get_or_create(user=user, book=book)
+    shelf, _created = Shelf.objects.get_or_create(user=user, book=book)
 
     new_status = (
         Shelf.Status.FINISHED if percent >= Shelf.FINISHED_PERCENT
@@ -690,7 +719,7 @@ def shelf_update(request):
     if book is None:
         return JsonResponse({'error': 'Книга не найдена'}, status=404)
 
-    shelf, _ = Shelf.objects.get_or_create(user=request.user, book=book)
+    shelf, _created = Shelf.objects.get_or_create(user=request.user, book=book)
 
     if 'status' in payload:
         status = str(payload['status'] or '')
@@ -788,3 +817,139 @@ def _rate_limited(user) -> bool:
         return True
     cache.set(key, used + 1, timeout=60)
     return False
+
+
+# --- Присутствие на сайте: сигнал от браузера и отчёт -----------------------
+
+# Не чаще одной записи в базу за столько секунд на пользователя. Сигнал
+# приходит раз в 30 секунд, но вкладок может быть открыто пять сразу —
+# и каждая шлёт свой. В базу при этом должна идти одна запись.
+HEARTBEAT_THROTTLE = 10
+
+
+@require_POST
+def heartbeat(request):
+    """API: «я всё ещё здесь». Браузер шлёт этот сигнал раз в полминуты.
+
+    Сам сигнал ничего не измеряет — время считает сервер, по разнице между
+    сигналами (см. ActivityDay.record). Так браузер не может приписать себе
+    лишние часы: он лишь сообщает факт присутствия, а не его длительность.
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Требуется вход'}, status=401)
+
+    key = f'hb:{request.user.pk}'
+    if cache.get(key):
+        # Слишком часто — молча соглашаемся, в базу не идём.
+        return JsonResponse({'ok': True, 'skipped': True})
+    cache.set(key, 1, timeout=HEARTBEAT_THROTTLE)
+
+    try:
+        payload = json.loads(request.body or b'{}')
+    except json.JSONDecodeError:
+        payload = {}
+
+    entry = ActivityDay.record(request.user, str(payload.get('page', ''))[:300])
+    return JsonResponse({
+        'ok': True,
+        'seconds': entry.seconds,
+        'visits': entry.visits,
+    })
+
+
+def _superuser_only(request):
+    """Аналитика — это данные обо всех людях сразу. Их видит только владелец."""
+    if not request.user.is_superuser:
+        raise PermissionDenied('Аналитика доступна только суперадминистратору.')
+
+
+# Сколько дней показывать. Белый список: число приходит из адреса,
+# а всё, что пришло из адреса, — предложение, а не команда.
+ANALYTICS_RANGES = (7, 30, 90)
+
+
+@login_required
+def analytics(request):
+    """Отчёт о посещаемости: кто заходит, как часто и надолго ли."""
+    _superuser_only(request)
+
+    try:
+        days = int(request.GET.get('days', 30))
+    except (TypeError, ValueError):
+        days = 30
+    if days not in ANALYTICS_RANGES:
+        days = 30
+
+    today = timezone.localdate()
+    since = today - timedelta(days=days - 1)
+    rows = ActivityDay.objects.filter(date__gte=since)
+
+    # --- Люди: по одной строке на читателя ---------------------------------
+    people = [
+        {
+            'name': item['user__username'],
+            'seconds': item['seconds'],
+            'human': format_duration(item['seconds']),
+            'visits': item['visits'],
+            'days': item['days'],
+            # Средняя длительность одного захода — «залетает на минуту»
+            # и «читает по часу» это очень разные читатели.
+            'per_visit': format_duration(item['seconds'] // max(item['visits'], 1)),
+        }
+        for item in rows.values('user__username')
+                        .annotate(seconds=Sum('seconds'), visits=Sum('visits'),
+                                  days=Count('date', distinct=True))
+                        .order_by('-seconds')
+    ]
+
+    # --- Дни: столбики графика ---------------------------------------------
+    by_date = {
+        item['date']: item
+        for item in rows.values('date').annotate(
+            seconds=Sum('seconds'), visits=Sum('visits'),
+            people=Count('user', distinct=True),
+        )
+    }
+    # Дни без активности тоже показываем: провал в графике — это тоже факт.
+    peak = max((item['seconds'] for item in by_date.values()), default=0) or 1
+    chart = []
+    for shift in range(days):
+        day = since + timedelta(days=shift)
+        item = by_date.get(day, {})
+        seconds = item.get('seconds', 0)
+        chart.append({
+            'date': day,
+            'seconds': seconds,
+            'human': format_duration(seconds),
+            'people': item.get('people', 0),
+            'visits': item.get('visits', 0),
+            'height': round(seconds / peak * 100),
+        })
+
+    total_seconds = sum(item['seconds'] for item in people)
+    total_visits = sum(item['visits'] for item in people)
+
+    # Кто на сайте прямо сейчас: сигнал был совсем недавно.
+    online_since = timezone.now() - timedelta(seconds=ActivityDay.HEARTBEAT_SECONDS * 3)
+
+    return render(request, 'reader/analytics.html', {
+        'days': days,
+        'ranges': ANALYTICS_RANGES,
+        'people': people,
+        'chart': chart,
+        'summary': {
+            'people': len(people),
+            'visits': total_visits,
+            'time': format_duration(total_seconds),
+            'average': format_duration(total_seconds // max(len(people), 1)),
+        },
+        'online': list(
+            ActivityDay.objects
+            .filter(date__gte=today - timedelta(days=1), last_seen__gte=online_since)
+            .select_related('user')
+        ),
+        'today': [
+            entry for entry in
+            ActivityDay.objects.filter(date=today).select_related('user')
+        ],
+    })

@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load i18n l10n %}
+
+{% block title %}{% translate "Посещаемость" %} — {% translate "Библиотека" %}{% endblock %}
+
+{% block content %}
+<div class="wrap analytics-page">
+
+  <div class="toolbar">
+    <div class="toolbar-title">
+      <h1>{% translate "Посещаемость" %}</h1>
+      <span class="muted">{% blocktranslate %}за {{ days }} дней{% endblocktranslate %}</span>
+    </div>
+
+    <div class="toolbar-tools">
+      <div class="seg range-seg">
+        {% for value in ranges %}
+          <a href="?days={{ value }}" class="{% if value == days %}on{% endif %}">{{ value }}</a>
+        {% endfor %}
+      </div>
+      <a class="ghost-btn" href="/admin/reader/activityday/">{% translate "В админке" %}</a>
+    </div>
+  </div>
+
+  {% comment %}
+    Четыре числа, с которых начинается любой разговор о посещаемости:
+    сколько людей, сколько заходов, сколько времени суммарно и сколько
+    в среднем на человека. Среднее важнее общего: оно отвечает на вопрос
+    «сайтом действительно пользуются или просто заглядывают?».
+  {% endcomment %}
+  <div class="metric-row">
+    <div class="metric">
+      <b>{{ summary.people }}</b>
+      <span>{% translate "читателей" %}</span>
+    </div>
+    <div class="metric">
+      <b>{{ summary.visits }}</b>
+      <span>{% translate "заходов" %}</span>
+    </div>
+    <div class="metric">
+      <b>{{ summary.time }}</b>
+      <span>{% translate "всего на сайте" %}</span>
+    </div>
+    <div class="metric">
+      <b>{{ summary.average }}</b>
+      <span>{% translate "в среднем на человека" %}</span>
+    </div>
+  </div>
+
+  {% if online %}
+    <section class="online-now">
+      <h2 class="block-title">{% translate "Сейчас на сайте" %}</h2>
+      <div class="online-list">
+        {% for entry in online %}
+          <span class="online-chip">
+            <i class="dot"></i>{{ entry.user.username }}
+            <small>{{ entry.human_time }}</small>
+          </span>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  <section class="chart-block">
+    <h2 class="block-title">{% translate "По дням" %}</h2>
+    <div class="chart">
+      {% for day in chart %}
+        {% comment %}
+          Высота столбика приходит из view уже посчитанной в процентах:
+          шаблоны Django намеренно не умеют делить, и это правильно —
+          арифметике место в Python, где её видно и можно проверить.
+        {% endcomment %}
+        <div class="chart-col" title="{{ day.date }} — {{ day.human }} · {{ day.people }} {% translate 'читателей' %}">
+          <div class="chart-bar" style="height: {{ day.height|unlocalize }}%"></div>
+          <span class="chart-label">{{ day.date|date:"d.m" }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="people-block">
+    <h2 class="block-title">
+      {% translate "Читатели" %} <span class="muted">{{ people|length }}</span>
+    </h2>
+
+    {% if people %}
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>{% translate "Читатель" %}</th>
+              <th>{% translate "Время на сайте" %}</th>
+              <th>{% translate "Заходов" %}</th>
+              <th>{% translate "Дней" %}</th>
+              <th>{% translate "За один заход" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for person in people %}
+              <tr>
+                <td class="name">{{ person.name }}</td>
+                <td><b>{{ person.human }}</b></td>
+                <td>{{ person.visits }}</td>
+                <td>{{ person.days }}</td>
+                <td class="muted">{{ person.per_visit }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty">
+        <strong>{% translate "Пока тихо" %}</strong>
+        {% translate "За выбранный период никто не заходил." %}
+      </div>
+    {% endif %}
+  </section>
+
+  {% if today %}
+    <section class="people-block">
+      <h2 class="block-title">{% translate "Сегодня" %}</h2>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>{% translate "Читатель" %}</th>
+              <th>{% translate "Время на сайте" %}</th>
+              <th>{% translate "Заходов" %}</th>
+              <th>{% translate "Последняя страница" %}</th>
+              <th>{% translate "Последний сигнал" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for entry in today %}
+              <tr>
+                <td class="name">{{ entry.user.username }}</td>
+                <td><b>{{ entry.human_time }}</b></td>
+                <td>{{ entry.visits }}</td>
+                <td class="muted path">{{ entry.last_page|default:"—" }}</td>
+                <td class="muted">{{ entry.last_seen|time:"H:i" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+
+  <p class="analytics-note">
+    {% comment %}
+      blocktranslate в одну строку не для красоты: переносы и отступы внутри
+      тега попадают прямо в строку перевода, и та же фраза с другим отступом
+      считается уже другой строкой — перевод к ней не подберётся.
+    {% endcomment %}
+    {% blocktranslate with seconds=heartbeat_seconds %}Браузер сообщает о присутствии раз в {{ seconds }} секунд и только когда вкладка открыта на экране.{% endblocktranslate %}
+    {% translate "Время считает сервер — по разнице между сигналами, поэтому вкладка, забытая на ночь, не превращается в часы чтения." %}
+  </p>
+
+</div>
+{% endblock %}

@@ -1,7 +1,10 @@
 from django.contrib import admin, messages
+from django.db.models import Count, Sum
 from django.utils.html import format_html
 
-from .models import Book, BookRequest, Category, Chapter, Quote, ReadingProgress, Shelf
+from .models import (ActivityDay, Book, BookRequest, Category, Chapter, Quote,
+                     ReadingProgress, Shelf)
+from .models import format_duration
 from .parsing import ParseError, import_book
 
 admin.site.site_header = 'Библиотека — панель управления'
@@ -131,3 +134,43 @@ class BookRequestAdmin(admin.ModelAdmin):
         self.message_user(request, f'Заказов обновлено: {updated}', messages.SUCCESS)
 
     actions = ['mark_in_work', 'mark_done']
+
+
+@admin.register(ActivityDay)
+class ActivityDayAdmin(admin.ModelAdmin):
+    """Активность: сколько времени человек провёл на сайте и как часто заходил.
+
+    Всё только на чтение. Эти строки пишет сервер по сигналам браузера —
+    править их руками означало бы портить собственную статистику.
+    """
+
+    list_display = ('date', 'user', 'human_time', 'visits', 'beats', 'last_page', 'last_seen')
+    list_filter = ('date', 'user')
+    search_fields = ('user__username', 'last_page')
+    date_hierarchy = 'date'
+    ordering = ('-date', '-seconds')
+    readonly_fields = ('user', 'date', 'seconds', 'visits', 'beats', 'last_page', 'last_seen')
+
+    @admin.display(description='Время на сайте', ordering='seconds')
+    def human_time(self, obj):
+        return obj.human_time
+
+    def has_add_permission(self, request):
+        return False
+
+    def changelist_view(self, request, extra_context=None):
+        """Над таблицей — короткая сводка за всё время.
+
+        Считаем одним запросом с агрегатами: тянуть все строки в Python,
+        чтобы их сложить, — лишняя работа и для базы, и для памяти.
+        """
+        totals = ActivityDay.objects.aggregate(
+            seconds=Sum('seconds'), visits=Sum('visits'), people=Count('user', distinct=True),
+        )
+        extra_context = extra_context or {}
+        extra_context['title'] = (
+            f"Активность · людей: {totals['people'] or 0} · "
+            f"заходов: {totals['visits'] or 0} · "
+            f"всего времени: {format_duration(totals['seconds'])}"
+        )
+        return super().changelist_view(request, extra_context)

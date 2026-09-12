@@ -1,8 +1,10 @@
-{% load l10n library_extras %}
+{% load i18n l10n library_extras %}
 {# Карточка книги. Один фрагмент — и в сетке, и в списке, и на полке «Читаю сейчас». #}
-<article class="book-card" data-book="{{ book.slug }}">
+{# --i — номер карточки: по нему CSS сдвигает появление каждой следующей #}
+<article class="book-card" data-book="{{ book.slug }}"
+         style="--hue: {{ book.title|cover_hue }}; --i: {{ forloop.counter0 }}">
 
-  <a class="book-cover" href="{{ book.get_absolute_url }}" style="--hue: {{ book.title|cover_hue }}">
+  <a class="book-cover" href="{{ book.get_absolute_url }}">
     {% if book.cover %}
       <img src="{{ book.cover.url }}" alt="Обложка: {{ book.title }}" loading="lazy">
     {% else %}
@@ -11,23 +13,26 @@
 
     {% if book.progress %}
       <div class="card-progress"><span style="width: {{ book.progress.percent|unlocalize }}%"></span></div>
+      {# Процент прямо на обложке: на полке «Продолжить чтение» это первое,
+         что хочется увидеть, ещё до названия #}
+      <span class="cover-badge">{{ book.progress.percent|floatformat:0|unlocalize }}%</span>
     {% endif %}
   </a>
 
   {% if user.is_authenticated %}
     <div class="card-actions">
-      <button type="button" title="В избранное" data-shelf="favorite"
+      <button type="button" title="{% translate 'В избранное' %}" data-shelf="favorite"
               class="{% if book.shelf_entry.is_favorite %}on{% endif %}">♥</button>
-      <button type="button" title="В планах" data-shelf="planned"
+      <button type="button" title="{% translate 'В планах' %}" data-shelf="planned"
               class="{% if book.shelf_entry.status == 'planned' %}on{% endif %}">◷</button>
-      <button type="button" title="Прочитано" data-shelf="finished"
+      <button type="button" title="{% translate 'Прочитано' %}" data-shelf="finished"
               class="{% if book.shelf_entry.status == 'finished' %}on{% endif %}">✓</button>
     </div>
   {% endif %}
 
   <div class="book-meta">
     <a class="t" href="{{ book.get_absolute_url }}">{{ book.title }}</a>
-    <div class="a">{{ book.author|default:'Автор не указан' }}</div>
+    <div class="a">{% if book.author %}{{ book.author }}{% else %}{% translate "Автор не указан" %}{% endif %}</div>
 
     <div class="facts-row">
       {% if book.progress %}
@@ -39,7 +44,7 @@
     {% if book.categories.all %}
       <div class="cats">
         {% for category in book.categories.all %}
-          <a href="{% query_replace category=category.slug shelf='' %}">{{ category.name }}</a>
+          <a href="{% query_replace category=category.slug shelf='' %}">{% translate category.name %}</a>
         {% endfor %}
       </div>
     {% endif %}

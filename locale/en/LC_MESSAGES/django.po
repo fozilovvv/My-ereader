@@ -316,3 +316,268 @@ msgstr "Popular authors"
 
 msgid "смотреть произведения"
 msgstr "view works"
+
+# --- Права доступа, аналитика и сообщения (добавлено) ---
+
+msgid "Эта страница доступна после входа."
+msgstr "This page is available after signing in."
+
+msgid "Войди, чтобы читать книги и сохранять прогресс."
+msgstr "Sign in to read books and save your progress."
+
+msgid "Войди, чтобы заказать книгу — так мы сможем ответить тебе."
+msgstr "Sign in to order a book, so that we can reply to you."
+
+msgid "Заказ принят — посмотрим, что можно найти."
+msgstr "Order received — we will see what can be found."
+
+msgid "«%(title)s» готова к чтению — глав: %(count)d"
+msgstr "“%(title)s” is ready to read — chapters: %(count)d"
+
+msgid "«%(title)s» добавлена — глав: %(count)d"
+msgstr "“%(title)s” has been added — chapters: %(count)d"
+
+msgid "Книга не выбрана."
+msgstr "No book selected."
+
+msgid "Не удалось скачать: %s"
+msgstr "Could not download: %s"
+
+msgid "Файл скачался, но разобрать не вышло: %s"
+msgstr "The file downloaded, but could not be parsed: %s"
+
+msgid "Заказ не найден."
+msgstr "Order not found."
+
+msgid "Неизвестный статус."
+msgstr "Unknown status."
+
+msgid "меньше минуты"
+msgstr "less than a minute"
+
+msgid "%(count)d мин"
+msgstr "%(count)d min"
+
+msgid "%(count)d ч"
+msgstr "%(count)d h"
+
+msgid "%(hours)d ч %(minutes)d мин"
+msgstr "%(hours)d h %(minutes)d min"
+
+msgid "Новая"
+msgstr "New"
+
+msgid "В работе"
+msgstr "In progress"
+
+msgid "Добавлена"
+msgstr "Added"
+
+msgid "Отклонена"
+msgstr "Rejected"
+
+msgid "Ожидает разбора"
+msgstr "Waiting to be parsed"
+
+msgid "Готова к чтению"
+msgstr "Ready to read"
+
+msgid "Ошибка разбора"
+msgstr "Parsing error"
+
+msgid "День активности"
+msgstr "Activity day"
+
+msgid "Активность пользователей"
+msgstr "User activity"
+
+msgid "Меню"
+msgstr "Menu"
+
+msgid "Поиск: «%(query)s»"
+msgstr "Search: “%(query)s”"
+
+msgid "Ни одна книга не подходит под выбранные условия."
+msgstr "No book matches the selected filters."
+
+msgid "Сбросить фильтры"
+msgstr "Clear filters"
+
+msgid "Загрузи первую книгу"
+msgstr "Upload the first book"
+
+msgid "Книги добавляет администратор."
+msgstr "Books are added by the administrator."
+
+msgid "Автор не указан"
+msgstr "Author unknown"
+
+msgid "В избранное"
+msgstr "Add to favourites"
+
+msgid "Войти и читать"
+msgstr "Sign in and read"
+
+msgid "Чтение, полки и цитаты — после входа."
+msgstr "Reading, shelves and quotes are available after signing in."
+
+msgid "глав"
+msgstr "chapters"
+
+msgid "Читать"
+msgstr "Read"
+
+msgid "Цитат"
+msgstr "Quotes"
+
+msgid "Книга ещё не разобрана на главы."
+msgstr "This book has not been split into chapters yet."
+
+msgid "Аналитика"
+msgstr "Analytics"
+
+msgid "Посещаемость"
+msgstr "Traffic"
+
+msgid "за %(days)s дней"
+msgstr "over %(days)s days"
+
+msgid "В админке"
+msgstr "Open in admin"
+
+msgid "читателей"
+msgstr "readers"
+
+msgid "заходов"
+msgstr "visits"
+
+msgid "всего на сайте"
+msgstr "total on site"
+
+msgid "в среднем на человека"
+msgstr "average per person"
+
+msgid "Сейчас на сайте"
+msgstr "Online now"
+
+msgid "По дням"
+msgstr "By day"
+
+msgid "Читатели"
+msgstr "Readers"
+
+msgid "Читатель"
+msgstr "Reader"
+
+msgid "Время на сайте"
+msgstr "Time on site"
+
+msgid "Заходов"
+msgstr "Visits"
+
+msgid "Дней"
+msgstr "Days"
+
+msgid "За один заход"
+msgstr "Per visit"
+
+msgid "Пока тихо"
+msgstr "Quiet so far"
+
+msgid "За выбранный период никто не заходил."
+msgstr "Nobody visited during this period."
+
+msgid "Сегодня"
+msgstr "Today"
+
+msgid "Последняя страница"
+msgstr "Last page"
+
+msgid "Последний сигнал"
+msgstr "Last signal"
+
+msgid "Браузер сообщает о присутствии раз в %(seconds)s секунд и только когда вкладка открыта на экране."
+msgstr "The browser reports presence every %(seconds)s seconds, and only while the tab is open on screen."
+
+msgid "Время считает сервер — по разнице между сигналами, поэтому вкладка, забытая на ночь, не превращается в часы чтения."
+msgstr "Time is counted by the server from the gap between signals, so a tab left open overnight does not turn into hours of reading."
+
+# --- Названия жанров ---
+
+msgid "Классика"
+msgstr "Classics"
+
+msgid "Современная проза"
+msgstr "Modern prose"
+
+msgid "Фантастика"
+msgstr "Science fiction"
+
+msgid "Фэнтези"
+msgstr "Fantasy"
+
+msgid "Детектив"
+msgstr "Detective"
+
+msgid "Триллер"
+msgstr "Thriller"
+
+msgid "Ужасы"
+msgstr "Horror"
+
+msgid "Романтика"
+msgstr "Romance"
+
+msgid "Приключения"
+msgstr "Adventure"
+
+msgid "Драматургия"
+msgstr "Drama"
+
+msgid "Поэзия"
+msgstr "Poetry"
+
+msgid "Юмор"
+msgstr "Humour"
+
+msgid "Мифы и фольклор"
+msgstr "Myths and folklore"
+
+msgid "Детское"
+msgstr "Children"
+
+msgid "Нон-фикшн"
+msgstr "Non-fiction"
+
+msgid "История"
+msgstr "History"
+
+msgid "Биографии"
+msgstr "Biography"
+
+msgid "Психология"
+msgstr "Psychology"
+
+msgid "Философия"
+msgstr "Philosophy"
+
+msgid "Политика"
+msgstr "Politics"
+
+msgid "Религия"
+msgstr "Religion"
+
+msgid "Наука"
+msgstr "Science"
+
+msgid "Бизнес"
+msgstr "Business"
+
+msgid "Технологии"
+msgstr "Technology"
+
+msgid "Учебное"
+msgstr "Education"
+
+msgid "Справочники"
+msgstr "Reference"

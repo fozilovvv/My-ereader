@@ -400,3 +400,89 @@
   padding: 0 1px;
   box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--accent) 55%, transparent);
 }
+
+
+/* ============================================================
+   Чтение с телефона и планшета
+   ------------------------------------------------------------
+   Читалка — единственная страница, где человек проводит часы подряд,
+   и почти всегда с телефона. Поэтому здесь важнее всего две вещи:
+   ничего не должно перекрывать текст, и во всё нужно попадать пальцем.
+   ============================================================ */
+
+@media (max-width: 900px) {
+  .reader-bar-inner { padding: 0 14px; height: 52px; gap: 10px; }
+
+  /* Длинное название книги не должно выдавливать кнопки за край экрана. */
+  .back { min-width: 0; flex: 1; font-size: 13.5px; }
+
+  .reader-bar-actions { gap: 6px; flex: none; }
+  .reader-bar-actions .icon-btn { width: 40px; height: 40px; }
+
+  .reading { padding: 28px 20px 90px; }
+
+  /* Панели становятся нижними «шторками»: снизу до них дотягивается
+     большой палец, а сверху — нет. */
+  .settings-panel {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: auto;
+    max-width: none;
+    max-height: 78vh;
+    overflow-y: auto;
+    padding: 18px 18px calc(18px + env(safe-area-inset-bottom));
+    border: none;
+    border-top: 1px solid var(--border);
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, .22);
+  }
+
+  .seg button { padding: 11px 10px; font-size: 13.5px; }
+  .setting input[type="range"] { height: 34px; }
+  .settings-reset { padding: 12px; }
+
+  .toc-drawer {
+    width: auto;
+    max-width: none;
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    height: 82vh;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    border-radius: 18px 18px 0 0;
+  }
+
+  .toc-drawer a { padding: 13px 14px; min-height: 46px; }
+
+  /* Кнопки «Назад» и «Дальше» — во всю ширину: промахнуться нельзя. */
+  .chapter-nav { gap: 10px; }
+  .nav-btn { flex: 1; text-align: center; padding: 14px 16px; }
+}
+
+@media (max-width: 620px) {
+  :root { --reading-size: 18px; }
+
+  .reading { padding: 26px 16px 90px; }
+  .chapter-title { font-size: 23px; }
+
+  /* По ширине — без выравнивания по обоим краям: на узкой колонке оно
+     рвёт строки огромными пробелами. */
+  .chapter-content p { text-align: left; }
+
+  /* Панель выделения не помещается в три кнопки подряд — даём перенос. */
+  .sel-toolbar { max-width: calc(100vw - 24px); flex-wrap: wrap; }
+  .sel-toolbar button { padding: 10px 12px; font-size: 13.5px; }
+
+  .counter { font-size: 12px; }
+}
+
+/* Сенсорный экран: наводить нечем — подсветку по наведению убираем,
+   чтобы «залипшее» состояние после касания не путало. */
+@media (hover: none) {
+  .toc-drawer a:hover { background: transparent; }
+  .nav-btn:hover { border-color: var(--border); }
+}

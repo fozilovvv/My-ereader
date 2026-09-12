@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static i18n l10n library_extras %}
 
-{% block title %}Каталог — Библиотека{% endblock %}
+{% block title %}{% translate "Каталог" %} — {% translate "Библиотека" %}{% endblock %}
 
 {% block content %}
 <div class="layout">
@@ -45,11 +45,11 @@
 
       {% for group in category_groups %}
         <details class="side-fold" {% if group.open %}open{% endif %}>
-          <summary>{% translate group.label %}<span class="count">{{ group.items|length }}</span></summary>
+          <summary>{{ group.label }}<span class="count">{{ group.items|length }}</span></summary>
           <ul class="side-list">
             {% for category in group.items %}
               <li><a class="side-link {% if current_category == category.slug %}active{% endif %}"
-                     href="{% query_replace category=category.slug %}">{{ category.name }}
+                     href="{% query_replace category=category.slug %}">{% translate category.name %}
                      <span class="count">{{ category.total }}</span></a></li>
             {% endfor %}
           </ul>
@@ -65,6 +65,21 @@
           <li><a class="side-link" href="{% url 'reader:book_upload' %}"><i class="ic">↑</i>{% translate "Загрузить файл" %}</a></li>
           <li><a class="side-link" href="{% url 'reader:book_request_list' %}"><i class="ic">✉</i>{% translate "Заказы" %}
               {% if pending_orders_count %}<span class="count">{{ pending_orders_count }}</span>{% endif %}</a></li>
+        </ul>
+      </nav>
+    {% endif %}
+
+    {% comment %}
+      Аналитика — данные обо всех людях сразу. Её видит только владелец
+      сайта (is_superuser), а не всякий сотрудник с доступом в админку:
+      «умею добавлять книги» и «вижу, кто сколько тут сидит» — это разные
+      права, и смешивать их не стоит.
+    {% endcomment %}
+    {% if user.is_superuser %}
+      <nav class="side-group">
+        <h3 class="side-title">{% translate "Аналитика" %}</h3>
+        <ul class="side-list">
+          <li><a class="side-link" href="{% url 'reader:analytics' %}"><i class="ic">◔</i>{% translate "Посещаемость" %}</a></li>
         </ul>
       </nav>
     {% endif %}
@@ -90,11 +105,11 @@
     <div class="toolbar">
       <div class="toolbar-title">
         <h1>
-          {% if query %}Поиск: «{{ query }}»
-          {% elif current_shelf == 'favorite' %}Избранное
-          {% elif current_shelf == 'reading' %}Читаю сейчас
-          {% elif current_shelf == 'planned' %}В планах
-          {% elif current_shelf == 'finished' %}Прочитано
+          {% if query %}{% blocktranslate %}Поиск: «{{ query }}»{% endblocktranslate %}
+          {% elif current_shelf == 'favorite' %}{% translate "Избранное" %}
+          {% elif current_shelf == 'reading' %}{% translate "Читаю сейчас" %}
+          {% elif current_shelf == 'planned' %}{% translate "В планах" %}
+          {% elif current_shelf == 'finished' %}{% translate "Прочитано" %}
           {% else %}{% translate "Каталог" %}{% endif %}
         </h1>
         <span class="muted">{{ total_books }}</span>
@@ -117,6 +132,31 @@
       </div>
     </div>
 
+    {% comment %}
+      Быстрые полки. На ноутбуке они в сайдбаре слева и всегда на виду,
+      а на телефоне сайдбар уезжает в меню — и самые частые фильтры
+      оказывались в двух касаниях вместо одного. Здесь они лентой под
+      заголовком; на широком экране блок скрыт, чтобы не двоить сайдбар.
+    {% endcomment %}
+    {% if user.is_authenticated %}
+      <nav class="quick-shelves">
+        <a class="qs {% if not current_shelf %}on{% endif %}"
+           href="{% query_replace shelf='' %}">{% translate "Все книги" %}</a>
+        <a class="qs {% if current_shelf == 'reading' %}on{% endif %}"
+           href="{% query_replace shelf='reading' %}">{% translate "Читаю сейчас" %}
+           <b>{{ shelf_counts.reading }}</b></a>
+        <a class="qs {% if current_shelf == 'planned' %}on{% endif %}"
+           href="{% query_replace shelf='planned' %}">{% translate "В планах" %}
+           <b>{{ shelf_counts.planned }}</b></a>
+        <a class="qs {% if current_shelf == 'finished' %}on{% endif %}"
+           href="{% query_replace shelf='finished' %}">{% translate "Прочитано" %}
+           <b>{{ shelf_counts.finished }}</b></a>
+        <a class="qs {% if current_shelf == 'favorite' %}on{% endif %}"
+           href="{% query_replace shelf='favorite' %}">♥ {% translate "Избранное" %}
+           <b>{{ shelf_counts.favorite }}</b></a>
+      </nav>
+    {% endif %}
+
     {% if reading %}
       <section class="shelf">
         <h2 class="shelf-title">{% translate "Продолжить чтение" %}</h2>
@@ -135,14 +175,14 @@
       <div class="empty">
         {% if query or current_category or current_shelf %}
           <strong>{% translate "Здесь пока пусто" %}</strong>
-          Ни одна книга не подходит под выбранные условия.
-          <a href="{% url 'reader:book_list' %}">Сбросить фильтры</a>
+          {% translate "Ни одна книга не подходит под выбранные условия." %}
+          <a href="{% url 'reader:book_list' %}">{% translate "Сбросить фильтры" %}</a>
         {% else %}
           <strong>{% translate "Библиотека пока пуста" %}</strong>
           {% if user.is_staff %}
-            <a href="{% url 'reader:book_upload' %}">Загрузи первую книгу</a>
+            <a href="{% url 'reader:book_upload' %}">{% translate "Загрузи первую книгу" %}</a>
           {% else %}
-            Книги добавляет администратор.
+            {% translate "Книги добавляет администратор." %}
           {% endif %}
         {% endif %}
       </div>

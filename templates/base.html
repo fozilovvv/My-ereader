@@ -2,19 +2,45 @@
 <html lang="{{ LANGUAGE_CODE|default:"ru" }}">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% comment %}
+    viewport — первое, без чего телефон не покажет сайт нормально: без этой
+    строки браузер решает, что страница свёрстана для монитора, рисует её
+    шириной 980 пикселей и уменьшает целиком. Текст становится нечитаемым,
+    а медиазапросы в CSS не срабатывают вовсе.
+  {% endcomment %}
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f7f4ef">
   <title>{% block title %}{% translate "Библиотека" %}{% endblock %}</title>
 
   <script>
     // Выполняется ДО отрисовки страницы: восстанавливаем тему,
     // иначе при загрузке мелькнёт белый фон.
     (function () {
+      // Отметка «JavaScript работает». По ней CSS прячет сайдбар и меню из
+      // страницы — они переедут в выдвижную панель. Без этой отметки при
+      // отключённых скриптах меню исчезло бы совсем, и войти с телефона
+      // стало бы невозможно: так оно просто останется списком на странице.
+      document.documentElement.classList.add('js');
+
       try {
         var saved = localStorage.getItem('theme');
         if (saved) document.documentElement.setAttribute('data-theme', saved);
       } catch (e) {}
     })();
   </script>
+
+  {% comment %}
+    Inter — шрифт, нарисованный специально для экранов: у него крупные
+    внутрибуквенные просветы и цифры одинаковой ширины, поэтому проценты
+    и счётчики не «прыгают» при обновлении. preconnect открывает соединение
+    с сервером шрифтов заранее, пока браузер ещё разбирает страницу.
+    display=swap: текст виден сразу системным шрифтом и подменяется, когда
+    Inter доедет, — страница никогда не стоит пустой.
+  {% endcomment %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 
   <link rel="stylesheet" href="{% static 'css/main.css' %}">
   {% block extra_css %}{% endblock %}
@@ -24,20 +50,25 @@
 <header class="site-header">
   <div class="header-inner">
     <a class="logo" href="{% url 'reader:book_list' %}">
-      <span class="logo-mark">◗</span> {% translate "Библиотека" %}
+      <span class="logo-mark">◗</span> <span class="logo-text">{% translate "Библиотека" %}</span>
     </a>
 
+    {% comment %}
+      Поиск на телефоне не прячем, а переносим на отдельную строку (см. CSS):
+      искать книгу с телефона хочется чаще, чем с ноутбука, а не реже.
+    {% endcomment %}
     <form class="search" action="{% url 'reader:book_list' %}" method="get" role="search">
       <input type="search" name="q" placeholder="{% translate 'Поиск книг' %}" data-palette-open
              value="{{ query|default:'' }}" aria-label="{% translate 'Поиск книг' %}">
       <kbd class="search-hint">Ctrl K</kbd>
     </form>
 
-    <div class="header-actions">
-      {% comment %}
-        Переключатель языка. Форма, а не ссылки: Django запоминает выбор
-        в сессии, а POST закрыт CSRF-токеном.
-      {% endcomment %}
+    {% comment %}
+      На узком экране скрипт целиком переносит этот блок в выдвижную панель
+      и возвращает обратно, когда экран снова широкий. Разметка одна на оба
+      случая: две копии одного меню расходятся при первой же правке.
+    {% endcomment %}
+    <div class="header-actions" id="site-menu" data-nav>
       <form class="lang-switch" action="{% url 'set_language' %}" method="post">
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ request.get_full_path }}">
@@ -66,26 +97,69 @@
 
       {% if user.is_authenticated %}
         {% if user.is_staff %}
-          <a class="ghost-btn with-badge" href="{% url 'reader:book_request_list' %}">
-            {% translate "Заказы" %}
-            {% if pending_orders_count %}<span class="badge">{{ pending_orders_count }}</span>{% endif %}
-          </a>
-          <a class="ghost-btn" href="{% url 'reader:book_upload' %}">+ {% translate "Книга" %}</a>
+          {% comment %}
+            display: contents в CSS — обёртка нужна только чтобы спрятать
+            эти две ссылки разом. В выдвижной панели рядом уже стоит блок
+            «Пополнение» из сайдбара с теми же пунктами, и показывать
+            «Заказы» дважды на одном экране — неряшливо.
+          {% endcomment %}
+          <span class="staff-links">
+            <a class="ghost-btn with-badge" href="{% url 'reader:book_request_list' %}">
+              {% translate "Заказы" %}
+              {% if pending_orders_count %}<span class="badge">{{ pending_orders_count }}</span>{% endif %}
+            </a>
+            <a class="ghost-btn" href="{% url 'reader:book_upload' %}">+ {% translate "Книга" %}</a>
+          </span>
           <a class="ghost-btn" href="/admin/">{% translate "Админка" %}</a>
         {% endif %}
-        <span class="user-name">{{ user.username }}</span>
-        {# Выход только через POST: так чужая картинка на стороннем сайте не разлогинит тебя #}
-        <form action="{% url 'logout' %}" method="post" class="logout-form">
-          {% csrf_token %}
-          <button type="submit" class="ghost-btn">{% translate "Выйти" %}</button>
-        </form>
+        {% comment %}
+          Имя и выход — одна «таблетка», а не два самостоятельных элемента.
+          Раньше подпись и кнопка стояли рядом на равных, и глаз не понимал,
+          что они об одном и том же человеке. Кружок с буквой связывает их
+          и заодно отделяет личное от кнопок сайта.
+        {% endcomment %}
+        <div class="user-box">
+          <span class="avatar" aria-hidden="true">{{ user.username|slice:":1"|upper }}</span>
+          <span class="user-name">{{ user.username }}</span>
+          {# Выход только через POST: так чужая картинка на стороннем сайте не разлогинит тебя #}
+          <form action="{% url 'logout' %}" method="post" class="logout-form">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn"
+                    title="{% translate 'Выйти' %}" aria-label="{% translate 'Выйти' %}">
+              <span class="logout-ico" aria-hidden="true">⇥</span>
+              <span class="logout-label">{% translate "Выйти" %}</span>
+            </button>
+          </form>
+        </div>
       {% else %}
         <a class="ghost-btn" href="{% url 'login' %}">{% translate "Войти" %}</a>
         <a class="primary-btn small" href="{% url 'signup' %}">{% translate "Регистрация" %}</a>
       {% endif %}
     </div>
+
+    {# Гамбургер. На ноутбуке скрыт силами CSS — там меню и так помещается. #}
+    <button type="button" class="icon-btn burger" data-nav-toggle
+            aria-controls="site-drawer" aria-expanded="false"
+            aria-label="{% translate 'Меню' %}"><span></span></button>
   </div>
 </header>
+
+{% comment %}
+  Выдвижная панель для узких экранов. Своего содержимого у неё нет:
+  при переходе на телефон скрипт переносит сюда сайдбар и меню шапки,
+  а при возврате на широкий экран — возвращает на место. Так разметка
+  остаётся одна, и две копии меню не разъезжаются при правках.
+{% endcomment %}
+<div class="drawer" id="site-drawer" data-drawer hidden>
+  <div class="drawer-panel">
+    <div class="drawer-head">
+      <strong>{% translate "Меню" %}</strong>
+      <button type="button" class="icon-btn" data-nav-close
+              aria-label="{% translate 'Закрыть' %}">✕</button>
+    </div>
+    <div class="drawer-body" data-drawer-body></div>
+  </div>
+</div>
 
 {% if messages %}
   <div class="wrap">
@@ -117,7 +191,21 @@
   </div>
 </div>
 
+{% if user.is_authenticated %}
+  {% comment %}
+    Сигнал присутствия. Блок выводится только вошедшему — гостю скрипт
+    просто не найдёт настроек и ничего не отправит. Интервал приходит из
+    модели ActivityDay: одно значение на весь проект, а не два одинаковых
+    числа в Python и в JavaScript, которые однажды разъедутся.
+  {% endcomment %}
+  <div data-heartbeat hidden
+       data-url="{% url 'reader:heartbeat' %}"
+       data-interval="{{ heartbeat_seconds }}">{% csrf_token %}</div>
+  <script src="{% static 'js/heartbeat.js' %}" defer></script>
+{% endif %}
+
 <script src="{% static 'js/theme.js' %}" defer></script>
+<script src="{% static 'js/nav.js' %}" defer></script>
 <script src="{% static 'js/palette.js' %}" defer></script>
 {% block extra_js %}{% endblock %}
 </body>

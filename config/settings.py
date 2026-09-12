@@ -79,6 +79,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'reader.context_processors.pending_orders',
+                'reader.context_processors.heartbeat_settings',
             ],
         },
     },
@@ -132,8 +133,11 @@ LANGUAGES = [
 
 LOCALE_PATHS = [BASE_DIR / 'locale']
 
-# Замени на свой пояс, например: 'Asia/Tashkent', 'Europe/Moscow', 'Asia/Almaty'
-TIME_ZONE = 'UTC'
+# Часовой пояс решает, когда у статистики кончается день. При UTC «сегодня»
+# в отчёте посещаемости начиналось бы в 5 утра по Ташкенту — вечернее чтение
+# попадало бы в завтрашний столбик графика. Свой пояс: Europe/Moscow,
+# Asia/Almaty и так далее.
+TIME_ZONE = 'Asia/Tashkent'
 
 USE_I18N = True
 

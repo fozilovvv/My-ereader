@@ -28,32 +28,38 @@
       <a class="hero-back" href="{% url 'reader:book_list' %}">← {% translate "В каталог" %}</a>
 
       <h1>{{ book.title }}</h1>
-      <p class="hero-author">{{ book.author|default:'Автор не указан' }}</p>
+      <p class="hero-author">{% if book.author %}{{ book.author }}{% else %}{% translate "Автор не указан" %}{% endif %}</p>
 
       <div class="facts">
-        <span class="chip">{{ chapters|length }} глав</span>
-        <span class="chip">Читать {{ book.total_chars|reading_time }}</span>
+        <span class="chip">{{ chapters|length }} {% translate "глав" %}</span>
+        <span class="chip">{% translate "Читать" %} {{ book.total_chars|reading_time }}</span>
         {% if progress %}
           <span class="chip accent">{{ progress.percent|floatformat:0|unlocalize }}% · {{ book|time_left }}</span>
         {% endif %}
         {% if quotes_count %}
-          <a class="chip link" href="{% url 'reader:quotes_list' %}?book={{ book.slug }}">✎ Цитат: {{ quotes_count }}</a>
+          <a class="chip link" href="{% url 'reader:quotes_list' %}?book={{ book.slug }}">✎ {% translate "Цитат" %}: {{ quotes_count }}</a>
         {% endif %}
         {% for category in book.categories.all %}
-          <a class="chip link" href="{% url 'reader:book_list' %}?category={{ category.slug }}">{{ category.name }}</a>
+          <a class="chip link" href="{% url 'reader:book_list' %}?category={{ category.slug }}">{% translate category.name %}</a>
         {% endfor %}
       </div>
 
+      {% comment %}
+        Карточку книги видит и гость — это витрина библиотеки. А вот чтение,
+        полки и избранное живут за входом. Гостю честнее сразу показать
+        кнопку «Войти и читать», чем кнопку «Читать», которая всё равно
+        приведёт на форму входа.
+      {% endcomment %}
       {% if chapters %}
         <div class="detail-actions" data-book="{{ book.slug }}">
-          {% if progress and progress.chapter %}
-            <a class="primary-btn" href="{% url 'reader:chapter_read' book.slug progress.chapter.order %}">{% translate "Продолжить чтение" %}</a>
-            <a class="ghost-btn" href="{% url 'reader:chapter_read' book.slug 0 %}">{% translate "Сначала" %}</a>
-          {% else %}
-            <a class="primary-btn" href="{% url 'reader:chapter_read' book.slug 0 %}">{% translate "Начать чтение" %}</a>
-          {% endif %}
-
           {% if user.is_authenticated %}
+            {% if progress and progress.chapter %}
+              <a class="primary-btn" href="{% url 'reader:chapter_read' book.slug progress.chapter.order %}">{% translate "Продолжить чтение" %}</a>
+              <a class="ghost-btn" href="{% url 'reader:chapter_read' book.slug 0 %}">{% translate "Сначала" %}</a>
+            {% else %}
+              <a class="primary-btn" href="{% url 'reader:chapter_read' book.slug 0 %}">{% translate "Начать чтение" %}</a>
+            {% endif %}
+
             <div class="seg status-seg">
               <button type="button" data-shelf="planned"
                       class="{% if shelf_entry.status == 'planned' %}on{% endif %}">{% translate "В планах" %}</button>
@@ -63,9 +69,16 @@
                       class="{% if shelf_entry.status == 'finished' %}on{% endif %}">{% translate "Прочитано" %}</button>
             </div>
             <button type="button" class="fav-btn {% if shelf_entry.is_favorite %}on{% endif %}"
-                    data-shelf="favorite" title="В избранное">♥</button>
+                    data-shelf="favorite" title="{% translate 'В избранное' %}">♥</button>
           {% else %}
-            <span class="progress-note"><a href="{% url 'login' %}">Войди</a>, чтобы сохранять прогресс</span>
+            {# next= вернёт человека сразу в книгу, а не на главную #}
+            <a class="primary-btn" href="{% url 'login' %}?next={% url 'reader:chapter_read' book.slug 0 %}">
+              {% translate "Войти и читать" %}
+            </a>
+            <span class="progress-note">
+              {% translate "Чтение, полки и цитаты — после входа." %}
+              <a href="{% url 'signup' %}">{% translate "Регистрация" %}</a>
+            </span>
           {% endif %}
         </div>
       {% endif %}
@@ -94,7 +107,7 @@
           </a>
         </li>
       {% empty %}
-        <li><a>Книга ещё не разобрана на главы.</a></li>
+        <li><a>{% translate "Книга ещё не разобрана на главы." %}</a></li>
       {% endfor %}
     </ol>
   </section>

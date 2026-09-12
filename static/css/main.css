@@ -15,7 +15,14 @@
   --accent-soft:   #f2e6d8;
   --shadow:        0 1px 2px rgba(32, 29, 26, .05), 0 10px 30px rgba(32, 29, 26, .06);
   --radius:        14px;
-  --font-ui:       'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-ui:       'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  /* Стрелка селекта и лупа поиска — рисунком прямо в CSS. Отдельными
+     файлами это два лишних запроса к серверу ради двух крохотных значков.
+     Цвет выбран нейтрально-серым: он одинаково читается и на светлой,
+     и на тёмной теме, поэтому значок не нужно дублировать под каждую. */
+  --caret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%239b938a' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --loupe: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cg fill='none' stroke='%239b938a' stroke-width='1.5' stroke-linecap='round'%3E%3Ccircle cx='7' cy='7' r='4.6'/%3E%3Cpath d='M10.6 10.6 14 14'/%3E%3C/g%3E%3C/svg%3E");
   --font-book:     Georgia, 'Times New Roman', serif;
 }
 
@@ -64,6 +71,10 @@
 
 body {
   margin: 0;
+  /* cv11 — вариант строчной «a» без хвостика, tnum — цифры одной ширины.
+     Проценты прогресса обновляются на лету, и без tnum строка дёргалась бы
+     при каждой смене числа. */
+  font-feature-settings: 'cv11' 1, 'tnum' 1;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-ui);
@@ -275,8 +286,22 @@ a { color: inherit; text-decoration: none; }
 .sidebar {
   position: sticky;
   top: 64px;
+
+  /* Две строки подряд, и вторая — не украшение. 100vh на планшете и
+     телефоне считается по ОКНУ БЕЗ адресной строки, то есть по самому
+     большому возможному размеру. Колонка получалась выше видимой части
+     экрана: её низ уезжал под интерфейс браузера, а прокручиваться ей
+     было не нужно — по её собственным меркам содержимое помещалось.
+     Снаружи это выглядело как «прокрутка не работает».
+     dvh — динамическая высота, ровно та, что видно сейчас.
+     Первая строка остаётся для браузеров, которые dvh не знают. */
   height: calc(100vh - 64px);
+  height: calc(100dvh - 64px);
+
   overflow-y: auto;
+  /* Докрутил до конца — страница под ним не начинает ехать следом */
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: 22px 14px 30px;
   border-right: 1px solid var(--border);
   background: color-mix(in srgb, var(--surface) 45%, var(--bg));
@@ -336,7 +361,7 @@ a { color: inherit; text-decoration: none; }
   margin-bottom: 22px;
 }
 
-.toolbar-title { display: flex; align-items: baseline; gap: 10px; }
+.toolbar-title { display: flex; align-items: center; gap: 10px; }
 
 .toolbar-title h1 {
   margin: 0;
@@ -389,7 +414,17 @@ a { color: inherit; text-decoration: none; }
   box-shadow: 0 6px 12px rgba(0, 0, 0, .08), 0 18px 40px rgba(0, 0, 0, .14);
 }
 
-.book-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* height: 100% вместо auto — намеренно. Рамка .book-cover уже задаёт
+   пропорцию 2:3, и картинка должна её заполнить: при height: auto высокие
+   обложки вылезали бы за рамку, а широкие оставляли пустые поля, и ряд
+   книг перестал бы быть ровным. object-fit: cover кадрирует лишнее. */
+.book-cover img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
 /* Цвет заглушки берётся из названия книги: переменную --hue задаёт шаблон */
 .cover-fallback {
@@ -684,7 +719,10 @@ a.chip.link:hover { border-color: var(--accent); color: var(--text); }
 
 /* ---------- Описание и оглавление ---------- */
 
-.book-body { padding: 38px 0 70px; }
+/* padding с нулём по бокам здесь стирал боковые отступы .wrap — описание
+   и оглавление прилипали к самому краю экрана. На ноутбуке это пряталось
+   за широкими полями, а на планшете и телефоне лезло в глаза. */
+.book-body { padding: 38px 20px 70px; }
 
 .block-title {
   margin: 0 0 14px;
@@ -756,7 +794,7 @@ a.chip.link:hover { border-color: var(--accent); color: var(--text); }
   .hero-text h1 { font-size: 25px; }
   .hero-author { font-size: 15px; margin-bottom: 14px; }
   .hero-cover .cover-fallback { font-size: 34px; }
-  .book-body { padding: 26px 0 50px; }
+  .book-body { padding: 26px 16px 50px; }
 }
 
 /* ---------- Подвал ---------- */
@@ -773,7 +811,6 @@ a.chip.link:hover { border-color: var(--accent); color: var(--text); }
 @media (max-width: 720px) {
   .detail { grid-template-columns: 1fr; gap: 24px; }
   .detail-cover { max-width: 180px; }
-  .search { display: none; }
   .book-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 20px 16px; }
 }
 
@@ -867,57 +904,11 @@ a.chip.link:hover { border-color: var(--accent); color: var(--text); }
 
 .upload-card .field input[type="file"]:hover { border-color: var(--accent); }
 
-/* ---------- Макет на маленьких экранах ---------- */
+/* Раздел переехал вниз, в блок «Телефон и планшет»:
+   сайдбар больше не ложится лентой над книгами, а уезжает
+   в выдвижную панель. */
 
-@media (max-width: 900px) {
-  .layout { grid-template-columns: 1fr; gap: 18px; }
-
-  /* Сайдбар превращается в ленту фильтров сверху */
-  .sidebar {
-    position: static;
-    height: auto;
-    max-height: none;
-    overflow: visible;
-    padding: 14px 16px 2px;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .content { padding: 18px 16px 40px; }
-  .header-inner { padding: 0 16px; }
-
-  .side-group + .side-group { margin-top: 12px; }
-  .side-title { padding-left: 0; margin-bottom: 6px; }
-
-  .side-list {
-    display: flex;
-    gap: 7px;
-    overflow-x: auto;
-    padding-bottom: 10px;
-    scrollbar-width: none;
-  }
-
-  .side-list::-webkit-scrollbar { display: none; }
-
-  .side-link {
-    white-space: nowrap;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    padding: 7px 13px;
-    font-size: 13.5px;
-  }
-
-  .side-link.active { border-color: var(--accent); }
-  .side-link .count { margin-left: 4px; }
-
-  .toolbar-title h1 { font-size: 21px; }
-  .book-grid { grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 20px 14px; }
-}
-
-@media (max-width: 520px) {
-  .toolbar-tools { width: 100%; margin-left: 0; }
-  .select { flex: 1; }
-}
+/* (блок 520px убран: его правила перекрывались более поздними и только путали) */
 
 /* ---------- Действия на странице книги ---------- */
 
@@ -945,7 +936,7 @@ a.chip.link:hover { border-color: var(--accent); color: var(--text); }
 
 .status-seg button:hover { color: var(--text); }
 
-.status-seg button.on {
+.seg.status-seg button.on {
   background: var(--accent);
   color: #fff;
   font-weight: 600;
@@ -1508,7 +1499,9 @@ a.quote-place:hover { color: var(--accent); }
 }
 
 .lang-switch button {
-  padding: 4px 8px;
+  display: grid;
+  place-items: center;
+  padding: 4px 10px;
   border: none;
   border-radius: 7px;
   background: transparent;
@@ -1532,9 +1525,7 @@ a.quote-place:hover { color: var(--accent); }
 
 .ghost-btn.accent-btn:hover { background: var(--accent-soft); color: var(--text); }
 
-@media (max-width: 900px) {
-  .ghost-btn.accent-btn { display: none; }
-}
+
 
 /* ============================================================
    Правки интерфейса: ровный сайдбар, шапка, формы
@@ -1625,8 +1616,15 @@ a.quote-place:hover { color: var(--accent); }
 
 .field textarea:focus { border-color: var(--accent); }
 
+/* Планшет боком: места в шапке впритык. Прячем только подпись — кружок
+   с буквой и выход остаются, и блок пользователя не разваливается,
+   а просто становится компактнее. Полное имя видно в выдвижной панели. */
 @media (max-width: 1100px) {
-  .user-name { display: none; }
+  /* Привязка к .header-inner обязательна: правило должно касаться только
+     шапки. Без неё оно спорило с настройками панели за одно и то же имя,
+     и в выдвижном меню рядом с кнопкой «Выйти» зияла пустота. */
+  .header-inner .user-box .user-name { display: none; }
+  .header-inner .user-box { padding-right: 3px; }
 }
 
 /* ---------- Заказы: значок в шапке ---------- */
@@ -1859,3 +1857,1412 @@ a.quote-place:hover { color: var(--accent); }
 }
 
 .popular-authors .side-link:hover { border-color: var(--accent); }
+
+
+/* ============================================================
+   Телефон и планшет
+   ------------------------------------------------------------
+   Три рубежа, и у каждого своя причина:
+     1100px — все планшеты и всё, что уже: сайдбар и меню шапки уезжают
+              в выдвижную панель, поиск переходит на свою строку;
+      620px — телефон: три колонки книг, панели читалки снизу;
+      380px — узкие телефоны: две колонки, от логотипа остаётся знак.
+   Палец — не курсор: у него нет наведения и он в разы толще. Поэтому
+   ниже везде растут отступы, а не уменьшается шрифт.
+   ============================================================ */
+
+/* ---------- Гамбургер ---------- */
+
+.burger { display: none; }
+
+.burger span {
+  position: relative;
+  display: block;
+  width: 16px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: background .16s;
+}
+
+.burger span::before,
+.burger span::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 16px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform .18s ease;
+}
+
+.burger span::before { top: -5px; }
+.burger span::after { top: 5px; }
+
+/* Крестика из полосок здесь намеренно нет. Панель закрывается своим ✕
+   в её шапке, а гамбургер просвечивает сквозь затемнение рядом — два
+   крестика подряд заставляли гадать, который из них настоящий. */
+
+/* ---------- Планшет боком: сайдбар уже, но ещё слева ---------- */
+
+/* ---------- Планшеты и телефоны: меню в гамбургер ---------- */
+
+/* Рубеж 1100, а не 900. Причина конкретная: iPad Pro стоймя — это 1024
+   пикселя, он не попадал под 900 и оставался на «ноутбучном» пути с
+   боковой колонкой. Колонка при этом прокручивалась только тогда, когда
+   не помещалась, — а на высоком экране Pro она помещалась целиком, и
+   жест по ней уходил в никуда. Air и mini (820 и 768) в это время
+   получали панель и работали правильно. Одно поведение на все планшеты
+   убирает и разницу, и сам вопрос. */
+
+/* ---------- До 1100: пальцу нужны цели покрупнее ---------- */
+
+/* Это не про «маленький экран», а про «трогают пальцем». iPad Pro попадает
+   сюда тоже, хотя боковая колонка у него остаётся. */
+@media (max-width: 1100px) {
+  /* ---------- Обложка остаётся обложкой ---------- */
+
+  /* На мыши кнопки появляются по наведению и обложке не мешают. Пальцем
+     наводить нечем — они висят поверх картинки всегда и съедают её.
+     Полки ставятся на странице книги, где у кнопок есть подписи. */
+  .card-actions { display: none; }
+
+  /* ---------- Страница книги: действия ---------- */
+
+  /* Три строки, и ни одна кнопка не остаётся на строке в одиночку:
+     сердце всегда идёт в паре со статусами. Порядок держим разметкой,
+     без order — у гостя вместо статусов стоит подпись «Чтение и полки
+     после входа», и перестановка через order сдвинула бы её наверх.
+
+         [      Продолжить чтение      ]
+         [           Сначала           ]
+         [ В планах | Читаю | Прочитано ] [♥] */
+  .detail-actions { gap: 8px; }
+
+  .detail-actions .primary-btn {
+    flex: 1 1 100%;
+    text-align: center;
+    padding: 12px 18px;
+    font-size: 14.5px;
+  }
+
+  /* «Сначала» — действие второстепенное, ему хватает низкой строки. */
+  .detail-actions .ghost-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 100%;
+    height: 36px;
+    padding: 0 16px;
+    font-size: 13px;
+  }
+
+  .status-seg { flex: 1 1 auto; padding: 2px; }
+
+  .status-seg button {
+    flex: 1;
+    padding: 8px 4px;
+    font-size: 12.5px;
+    /* Без этого «В планах» ломалось по пробелу и кнопка вырастала вдвое */
+    white-space: nowrap;
+  }
+
+  .fav-btn { flex: none; width: 40px; height: 40px; font-size: 15px; }
+  .detail-actions .progress-note { flex: 1 1 100%; }
+  .toc-columns li { min-height: 46px; }
+}
+
+/* ---------- До 900: меню в гамбургер, сайдбар в панель ---------- */
+
+/* Рубеж именно здесь: iPad Air — 820, iPad mini — 768, они получают панель.
+   iPad Pro стоймя — 1024, у него хватает ширины на боковую колонку, и она
+   остаётся на месте. */
+@media (max-width: 900px) {
+  .burger { display: grid; }
+
+  .header-inner {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 52px;
+    padding: 7px 12px;
+    gap: 8px;
+    row-gap: 6px;
+  }
+
+  .logo { margin-right: auto; font-size: 15.5px; }
+
+  /* Поиск переезжает на собственную строку. */
+  .search {
+    order: 5;
+    flex: 1 0 100%;
+    max-width: none;
+    min-width: 0;
+  }
+
+  /* ---------- Макет: одна колонка ---------- */
+
+  /* display: block вместо grid — намеренно. У колонки grid минимальная
+     ширина равна min-content её содержимого: один широкий элемент внутри
+     растягивал всю колонку шире экрана, каталог уезжал вбок, а обложки
+     вырастали до гигантских. Обычный блок так не умеет. */
+  .layout { display: block; min-height: 0; }
+
+  /* В потоке страницы сайдбара и меню больше нет — они живут в выдвижной
+     панели. Условие .js обязательно: если скрипты отключены, переносить
+     блоки некому, и спрятанное меню оставило бы человека без входа. */
+  .js .sidebar { display: none; }
+  .js .header-inner .header-actions { display: none; }
+
+  /* Страховка для ленты с отрицательными полями — там же, где она живёт,
+     а не на всём документе (обрезанный body ломал выдвижную панель). */
+  .content { padding: 16px 14px 40px; min-width: 0; overflow-x: clip; }
+
+  .toc-columns { grid-template-columns: 1fr; }
+}
+
+/* ---------- 901–1100: iPad Pro — колонка остаётся, но уже ---------- */
+
+@media (min-width: 901px) and (max-width: 1100px) {
+  .layout { grid-template-columns: 212px minmax(0, 1fr); }
+  .content { padding: 22px 22px 44px; }
+  .sidebar { padding: 18px 10px 24px; }
+  .side-link { padding: 8px 10px; font-size: 13.5px; }
+  .header-actions .lang-switch button { padding: 0 8px; font-size: 11px; }
+  .header-actions .ghost-btn { padding: 0 11px; font-size: 13.5px; }
+}
+
+/* ---------- Телефон ---------- */
+
+@media (max-width: 620px) {
+  .wrap { padding: 0 14px; }
+  .content { padding: 16px 14px 40px; }
+
+  /* В виде «списком» обложка мельче — иначе не остаётся места подписи. */
+  .book-grid.as-list { grid-template-columns: 1fr; }
+
+  /* Правила сетки книг и панели инструментов переехали ниже, в блок
+     «Телефон: мельче обложки, плотнее каталог» — здесь они дублировались
+     и перекрывались, что мешало читать файл. */
+
+  /* Одна колонка вместо двух. Обложка в 104 пикселя отнимала у текста
+     больше трети ширины: кнопкам оставалось 242 пикселя при нужных 268,
+     и сердце уезжало на отдельную строку, а «Прочитано» упиралось в край.
+     В одну колонку остаётся 362 — запас почти в сотню пикселей. */
+  .hero-inner { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+
+  /* Обложка не тянется во всю ширину: при пропорции 2:3 она заняла бы
+     пол-экрана в высоту и отодвинула бы название за нижний край. */
+  .hero-cover { width: 124px; }
+  .hero-cover .cover-fallback { font-size: 40px; }
+
+  .hero-text h1 { font-size: 22px; }
+  .hero .facts { margin-bottom: 16px; }
+  .chip { font-size: 12px; padding: 4px 9px; }
+
+  .messages { padding-top: 12px; }
+  .message { font-size: 14px; }
+
+  .request-grid,
+  .upload-grid { grid-template-columns: 1fr; }
+  .upload-card { padding: 18px; max-width: none; }
+
+  .site-footer { padding: 20px 0; font-size: 12.5px; }
+}
+
+/* ---------- Совсем узкие телефоны ---------- */
+
+@media (max-width: 380px) {
+  .logo-text { display: none; }              /* остаётся только знак ◗ */
+  .book-grid { gap: 14px 10px; }
+  .header-inner { gap: 8px; padding: 8px 10px; }
+}
+
+/* ---------- Сенсорный экран любого размера ---------- */
+
+/* hover: none — не «маленький экран», а «нет курсора». Это и телефон,
+   и планшет, и ноутбук с сенсорным экраном. Наводить там нечем, поэтому
+   всё, что появлялось по наведению, должно быть видно сразу. */
+@media (hover: none) {
+  .card-actions { opacity: 1; transform: none; }
+  .book-card:hover .book-cover { transform: none; }
+  .toc-columns li:hover { transform: none; }
+}
+
+
+/* ============================================================
+   Аналитика посещаемости
+   ============================================================ */
+
+.analytics-page { padding-top: 26px; padding-bottom: 70px; }
+
+/* ---------- Переключатель периода ---------- */
+
+.range-seg { padding: 3px; }
+
+.range-seg a {
+  padding: 7px 14px;
+  border-radius: 7px;
+  color: var(--muted);
+  font-size: 13.5px;
+  font-weight: 600;
+  transition: background .13s, color .13s;
+}
+
+.range-seg a:hover { color: var(--text); }
+.seg.range-seg > a.on { background: var(--accent); color: #fff; box-shadow: none; }
+
+/* ---------- Четыре главных числа ---------- */
+
+/* auto-fit + minmax: на ноутбуке четыре плитки в ряд, на планшете две,
+   на телефоне одна — без единого медиазапроса. Браузер сам решает,
+   сколько поместится, и это надёжнее списка breakpoint'ов. */
+.metric-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.metric {
+  padding: 18px 18px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.metric b {
+  display: block;
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  line-height: 1.15;
+}
+
+.metric span {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+/* ---------- Кто на сайте прямо сейчас ---------- */
+
+.online-now { margin-bottom: 30px; }
+.online-list { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.online-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.online-chip small { color: var(--muted); font-weight: 400; }
+
+.online-chip .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3fa564;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #3fa564 22%, transparent);
+}
+
+/* ---------- График по дням ---------- */
+
+.chart-block { margin-bottom: 34px; }
+
+.chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 170px;
+  padding: 14px 14px 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow-x: auto;
+}
+
+.chart-col {
+  flex: 1 0 14px;
+  min-width: 14px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.chart-bar {
+  border-radius: 4px 4px 0 0;
+  background: var(--accent);
+  /* min-height: даже пустой день оставляет тонкую черту — иначе провал
+     в графике невозможно отличить от «здесь вообще нет столбика». */
+  min-height: 2px;
+  opacity: .85;
+  transition: opacity .13s;
+}
+
+.chart-col:hover .chart-bar { opacity: 1; }
+
+.chart-label {
+  flex: none;
+  padding-bottom: 8px;
+  color: var(--muted);
+  font-size: 10px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ---------- Таблица читателей ---------- */
+
+.people-block { margin-bottom: 34px; }
+
+/* Таблица не влезает на телефоне — пусть прокручивается сама,
+   не утаскивая вбок всю страницу. */
+.table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.data-table th {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.data-table tr:last-child td { border-bottom: none; }
+.data-table .name { font-weight: 600; }
+.data-table .muted { color: var(--muted); }
+
+.data-table .path {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 12.5px;
+}
+
+.analytics-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 640px;
+}
+
+@media (max-width: 620px) {
+  .analytics-page { padding-top: 16px; }
+  .metric { padding: 14px; }
+  .metric b { font-size: 21px; }
+  .chart { height: 140px; }
+  .chart-label { display: none; }       /* 30 подписей в ряд на телефоне не читаются */
+  .range-seg a { padding: 9px 12px; }
+}
+
+
+/* ============================================================
+   Шапка: блок пользователя
+   ============================================================ */
+
+/* Имя и выход — одна «таблетка». Пока они стояли рядом на равных,
+   глаз не связывал подпись с кнопкой; кружок с буквой связывает их
+   и отделяет личное от остальных кнопок сайта. */
+.user-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 4px 3px 3px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+}
+
+.avatar {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.user-box .user-name {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.logout-btn {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .13s, color .13s;
+}
+
+.logout-btn:hover { background: var(--surface-alt); color: #b23b32; }
+
+/* На ноутбуке достаточно значка со всплывающей подписью, в панели
+   телефона — наоборот, нужно слово: там значок без подписи непонятен. */
+.logout-label { display: none; }
+
+/* ============================================================
+   Выдвижная панель (off-canvas) для узких экранов
+   ============================================================ */
+
+.drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(0, 0, 0, .45);
+  opacity: 0;
+  transition: opacity .22s ease;
+}
+
+.drawer.open { opacity: 1; }
+.drawer[hidden] { display: none; }
+
+.drawer-panel {
+  position: absolute;
+  /* Привязка к краям вместо height: 100dvh. Единицы экрана на планшетах
+     ведут себя по-разному, а «от верха до низа родителя» — однозначно. */
+  inset: 0 auto 0 0;
+  width: min(86vw, 330px);
+
+  /* Сетка из двух строк — шапка по содержимому, тело на остаток. Строка
+     1fr в сетке умеет сжиматься сама, без оговорок про min-height,
+     на которых спотыкается flex-колонка. */
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+
+  /* Панель сама не прокручивается: прокрутка живёт только в теле.
+     Без этого браузеру есть из чего выбирать, и он выбирает не то. */
+  overflow: hidden;
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+  box-shadow: 8px 0 40px rgba(0, 0, 0, .25);
+  transform: translateX(-100%);
+  transition: transform .24s ease;
+}
+
+.drawer.open .drawer-panel { transform: none; }
+
+.drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.drawer-head strong {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: var(--muted);
+}
+
+.drawer-body {
+  /* pan-y: палец по этому блоку двигает его содержимое по вертикали.
+     Браузер узнаёт об этом до первого кадра и не отдаёт жест странице. */
+  touch-action: pan-y;
+  /* Страховка на случай, если строку сетки где-то переопределят:
+     без разрешения сжиматься блок растягивается под весь список,
+     и overflow-y становится не с чем работать. */
+  min-height: 0;
+  overflow-y: auto;
+  /* Прокрутка не «перетекает» на страницу под панелью, когда список кончился */
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 14px calc(24px + env(safe-area-inset-bottom));
+}
+
+/* Страница под открытой панелью не должна прокручиваться от движения пальца.
+   Замок нужен на обоих элементах: в разных браузерах прокруткой страницы
+   заведует то html, то body, и запереть надо того, кто ею занят. */
+html.drawer-open,
+body.drawer-open { overflow: hidden; }
+
+/* touch-action: none на затемнении здесь было бы опасно: браузер считает
+   разрешённый жест, проходя вверх по всем предкам прокручиваемого блока,
+   и запрет на внешней обёртке мог бы отменить прокрутку внутри панели —
+   ровно то, что мы и чиним. Страницу под панелью держит замок выше. */
+
+/* ---------- Сайдбар внутри панели ---------- */
+
+/* Селектор из двух классов перебивает `.sidebar { display: none }`
+   мобильного блока — специфичность выше, медиазапрос для этого не нужен. */
+.drawer .sidebar {
+  display: block;
+  position: static;
+  width: auto;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+  padding: 0;
+  border-right: none;
+  background: transparent;
+}
+
+.drawer .side-link { padding: 11px 12px; min-height: 44px; font-size: 14.5px; }
+.drawer .side-fold > summary { padding: 11px 12px; min-height: 42px; }
+.drawer .side-group + .side-group { margin-top: 22px; }
+
+/* ---------- Меню шапки внутри панели ---------- */
+
+/* Сетка из двух колонок, а не столбик: язык и тема — две настройки одного
+   рода, им место в одной строке. Кнопка темы во всю ширину выглядела бы
+   большой пустой полосой с крохотным значком посередине. */
+.drawer .header-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 9px;
+  margin: 24px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+/* Всё, кроме этой пары, занимает обе колонки. Вторая строка — про ссылки
+   сотрудника: обёртка .staff-links сама «прозрачна» (display: contents),
+   поэтому в сетку попадают её дети, и указывать колонку нужно им. */
+.drawer .header-actions > *:not(.lang-switch):not([data-theme-toggle]),
+.drawer .header-actions .staff-links > * {
+  grid-column: 1 / -1;
+}
+
+.drawer .header-actions .ghost-btn,
+.drawer .header-actions .primary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 13px 14px;
+  font-size: 15px;
+}
+
+.drawer .logout-form { width: 100%; }
+.drawer .lang-switch { width: 100%; height: 46px; }
+.drawer .lang-switch button { flex: 1; padding: 11px 0; font-size: 14px; }
+
+.drawer .icon-btn[data-theme-toggle] { width: 46px; height: 46px; border-radius: 10px; }
+
+.drawer .user-box {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 12px;
+}
+
+.drawer .user-box .user-name { display: block; flex: 1; max-width: none; font-size: 15px; }
+
+.drawer .logout-btn {
+  width: auto;
+  height: auto;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+}
+
+.drawer .logout-label { display: inline; font-size: 14px; }
+
+/* ============================================================
+   Никакого горизонтального смещения
+   ============================================================
+   Здесь раньше стояло `body { overflow-x: clip }` — и оно тихо ломало
+   выдвижную панель. По спецификации, если одна ось clip, а вторая
+   visible, то вторая тоже становится clip. Обрезанный body обрезает
+   и всё position: fixed внутри себя: панель рисовалась, но касания
+   до неё не доходили и уезжали на страницу под ней.
+
+   Настоящую причину горизонтального сдвига мы уже устранили — это была
+   grid-колонка, тянувшаяся под ширину содержимого. Осталось подстраховать
+   одну ленту с отрицательными полями, и делать это надо там же, где она
+   живёт, а не на всём документе. */
+/* (перенесено в блок ≤900 выше — там же, где живёт лента) */
+
+/* ============================================================
+   Телефон: сетка книг
+   ============================================================ */
+
+@media (max-width: 620px) {
+  /* Ровно две колонки, а не «сколько поместится»: авто-сетка на узком
+     экране то рисует одну обложку во всю ширину, то три крохотных. */
+  .book-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 12px;
+    padding-bottom: 34px;
+  }
+
+  /* minmax(0, 1fr) вместо 1fr — обязательно: у колонки 1fr минимальная
+     ширина равна min-content содержимого, и длинное название без пробелов
+     распирало бы колонку шире экрана. */
+  .book-grid.as-list { grid-template-columns: minmax(0, 1fr); }
+
+  .content { padding: 14px 12px 36px; }
+}
+
+
+/* ============================================================
+   Отделка интерфейса
+   ============================================================ */
+
+/* ---------- Сегментный переключатель ---------- */
+
+/* Базовых стилей .seg в main.css не было вовсе — они лежали только в
+   reader.css, который каталог не подключает. Поэтому «сеткой/списком»,
+   выбор статуса на странице книги и вкладки периода в аналитике
+   рисовались голыми кнопками браузера. Одно определение чинит все три. */
+.seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-alt);
+}
+
+.seg button,
+.seg > a {
+  display: grid;
+  place-items: center;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background .14s, color .14s;
+}
+
+.seg button:hover,
+.seg > a:hover { color: var(--text); }
+
+/* Выбранный пункт «приподнят» белым — так видно, что он выбран,
+   без лишней рамки и без яркой заливки. */
+.seg button.active,
+.seg button.on,
+.seg > a.on {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .08);
+}
+
+.view-switch button { min-width: 38px; padding: 6px 8px; font-size: 13px; }
+
+/* Сортировка и переключатель вида стоят рядом — значит, должны быть ровно
+   одной высоты. По отдельности они её набирали по-разному: селект из
+   отступов, сегменты из отступов вложенных кнопок, и разница в четыре
+   пикселя бросалась в глаза. */
+.toolbar-tools .select,
+.toolbar-tools .seg { height: 38px; }
+.toolbar-tools .seg { align-items: stretch; }
+.toolbar-tools .seg button { padding-top: 0; padding-bottom: 0; }
+
+/* ---------- Селект со своей стрелкой ---------- */
+
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 8px 32px 8px 13px;
+  border-radius: 10px;
+  background-image: var(--caret);
+  background-repeat: no-repeat;
+  background-position: right 11px center;
+  line-height: 1.2;
+  transition: border-color .14s;
+}
+
+.select:hover { border-color: var(--accent); }
+
+/* ---------- Поиск с лупой ---------- */
+
+.search input {
+  padding-left: 38px;
+  background-image: var(--loupe);
+  background-repeat: no-repeat;
+  background-position: left 13px center;
+}
+
+/* ---------- Счётчик рядом с заголовком ---------- */
+
+/* Было просто серое число в строке — глаз читал его как часть заголовка.
+   Собственный фон превращает его в отдельную величину. */
+/* Заливкой без рамки счётчик почти не отличался от фона страницы —
+   бледное пятно рядом с заголовком. Рамка делает его читаемым
+   на любой из трёх тем. */
+.toolbar-title .muted {
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* ---------- Обложка: свечение и мягкая тень ---------- */
+
+.book-cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  /* Тонкая внутренняя линия поверх картинки: убирает «наклейку»,
+     когда светлая обложка ложится на светлый фон. */
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14),
+              inset 0 -40px 60px -50px rgba(0, 0, 0, .6);
+  pointer-events: none;
+}
+
+/* Цветное свечение под обложкой — оттенок берётся из названия книги,
+   тот же, что у заглушки. Полка перестаёт быть плоской. */
+.book-card::before {
+  content: '';
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 12%;
+  bottom: 34%;
+  z-index: -1;
+  border-radius: 50%;
+  background: hsl(var(--hue, 30) 60% 55%);
+  filter: blur(26px);
+  opacity: 0;
+  transition: opacity .25s ease;
+}
+
+.book-card:hover::before { opacity: .28; }
+
+/* ---------- Появление карточек ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .book-card {
+    animation: card-in .42s cubic-bezier(.22, .8, .3, 1) both;
+    /* Ступенька в 26 мс: полка «проявляется» волной слева направо.
+       min() обрезает задержку на двенадцатой карточке — иначе
+       шестидесятая ждала бы полторы секунды. */
+    animation-delay: calc(min(var(--i, 0), 12) * 26ms);
+  }
+}
+
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+
+/* ============================================================
+   Шапка, панель инструментов и лента полок на узких экранах
+   ============================================================ */
+
+/* ---------- Панель инструментов: до 1100 ---------- */
+
+@media (max-width: 1100px) {
+  .toolbar { margin-bottom: 16px; gap: 10px 12px; }
+  .toolbar-title h1 { font-size: 21px; }
+
+  /* Счётчик стоит вплотную к заголовку, а не улетает к правому краю:
+     «63» — это про каталог, и читаться должно вместе с его названием.
+     Сами фильтры уходят вправо — так строка получает два ясных полюса
+     вместо трёх разбросанных кусков. */
+  .toolbar-tools {
+    width: auto;
+    margin-left: auto;
+    gap: 3px;
+    padding: 3px;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: var(--surface);
+  }
+
+  .toolbar-tools .select {
+    flex: 0 1 auto;
+    min-width: 0;
+    height: 32px;
+    padding: 0 28px 0 10px;
+    border: none;
+    background-color: transparent;
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+
+  .toolbar-tools .seg {
+    flex: none;
+    height: 32px;
+    padding: 0 0 0 3px;
+    border: none;
+    border-left: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
+    align-items: stretch;
+  }
+
+  .toolbar-tools .seg button { min-width: 34px; padding: 0 7px; font-size: 12.5px; }
+
+}
+
+/* ---------- Шапка на телефоне ---------- */
+
+@media (max-width: 900px) {
+  /* Поле поиска было великаном: скруглением 999px во всю ширину и высотой
+     под полсотни пикселей. Прямоугольник со скруглением 11px и высотой
+     40px читается как поле ввода, а не как кнопка. */
+  .search input {
+    height: 40px;
+    padding: 0 14px 0 36px;
+    border-radius: 11px;
+    /* 16px обязательны: при меньшем Safari на iPhone приближает страницу,
+       как только палец коснётся поля. Высоту держим не шрифтом, а числом. */
+    font-size: 16px;
+    /* Ровно высота содержимого (40 минус две рамки по пикселю): так текст
+       стоит по центру поля и в Safari, который сам его не центрирует. */
+    line-height: 38px;
+    background-position: left 12px center;
+  }
+
+  /* ---------- «Продолжить чтение» — горизонтальная лента ---------- */
+
+  /* Вертикальная сетка здесь ничего не давала: две недочитанные книги
+     занимали целый экран и сливались с каталогом ниже. Лента читается
+     как отдельная полка и не отнимает высоту у самого каталога. */
+  .shelf .book-grid {
+    display: flex;
+    gap: 12px;
+    /* Отрицательные поля тянут ленту под края экрана: обложка «уходит»
+       за край, и сразу понятно, что её можно пролистать. */
+    margin: 0 -14px;
+    padding: 2px 14px 18px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  .shelf .book-grid::-webkit-scrollbar { display: none; }
+
+  /* Ширина в пикселях, а не в процентах. Сорок процентов от узкого
+     телефона — это 140 пикселей, а от планшета в 820 — уже 316. */
+  .shelf .book-card { flex: 0 0 132px; scroll-snap-align: start; }
+  .shelf { padding-bottom: 4px; }
+}
+
+/* ---------- Шапка планшета: поиск ровно по центру ---------- */
+
+/* Сетка из трёх колонок вместо флекса. Крайние колонки одинаково тянутся,
+   поэтому средняя стоит точно посередине шапки — при любом размере
+   логотипа и любом наборе кнопок справа. Auto-полями во флексе такого
+   не добиться: они делят свободное место, а не выравнивают центр. */
+/* 621-900 — планшет с гамбургером. В шапке ровно три элемента: логотип,
+   поиск и кнопка меню. Крайние колонки тянутся одинаково, поэтому поиск
+   стоит точно посередине — auto-полями во флексе так не выйдет, они делят
+   свободное место, а не выравнивают центр. */
+@media (min-width: 621px) and (max-width: 900px) {
+  .header-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo { justify-self: start; margin-right: 0; }
+
+  .search {
+    order: 0;                 /* сбрасываем перенос на свою строку */
+    flex: none;
+    justify-self: center;
+    width: min(420px, 100%);
+    max-width: none;
+  }
+
+  .burger { justify-self: end; }
+}
+
+/* 901-1100 — iPad Pro. Здесь та же сетка была бы ошибкой: справа стоит
+   целый ряд кнопок шире трети шапки, а колонка minmax(0, 1fr) уже его —
+   кнопки вылезли бы за край экрана. Поэтому флекс и два auto-поля:
+   свободное место делится поровну слева и справа от поиска, и он встаёт
+   между логотипом и кнопками ровно посередине того, что осталось. */
+@media (min-width: 901px) and (max-width: 1100px) {
+  .search {
+    flex: 0 1 340px;
+    max-width: 340px;
+    min-width: 150px;
+    margin: 0 auto;
+  }
+
+  .header-actions { margin-left: 0; }
+  .search-hint { display: none; }
+}
+
+
+/* ---------- Меню внутри выдвижной панели ---------- */
+
+/* :has() спрашивает «есть ли внутри сайдбар?». На странице каталога он
+   есть, и в нём уже лежат «Заказы» и «Загрузить файл» — вторая копия
+   тех же пунктов ниже не нужна. На остальных страницах сайдбара нет,
+   и ссылки остаются единственным способом туда попасть. */
+.staff-links { display: contents; }
+.drawer-body:has(.sidebar) .staff-links { display: none; }
+
+/* Кнопки во всю ширину по 48 пикселей выглядели тяжело и распирали
+   панель. Здесь им место не кнопок, а строк списка — как у пунктов
+   сайдбара выше: та же высота, тот же шрифт, никаких рамок. */
+.drawer .header-actions .ghost-btn {
+  justify-content: flex-start;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 9px;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.drawer .header-actions .ghost-btn:hover { background: var(--surface-alt); }
+
+/* «Заказать книгу» и «Регистрация» — призыв к действию, они остаются
+   заметными: у первой рамка акцентного цвета, вторая залита им. */
+.drawer .header-actions .ghost-btn.accent-btn {
+  justify-content: center;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.drawer .header-actions .primary-btn {
+  justify-content: center;
+  padding: 11px 14px;
+  font-size: 14.5px;
+}
+
+.drawer .header-actions .with-badge { justify-content: space-between; }
+
+.drawer .header-actions { gap: 3px 9px; margin-top: 20px; padding-top: 16px; }
+
+/* Пара «язык + тема» и блок пользователя стоят особняком от списка ссылок */
+.drawer .lang-switch,
+.drawer .icon-btn[data-theme-toggle] { height: 42px; }
+.drawer .icon-btn[data-theme-toggle] { width: 42px; }
+.drawer .user-box { margin-top: 12px; }
+.drawer .logout-btn { padding: 8px 12px; font-size: 13.5px; }
+
+/* ---------- Статистика в панели: три плитки в один ряд ---------- */
+
+/* Раньше она занимала три строки и почти двести пикселей в самом низу
+   панели — до неё приходилось долго крутить. Тремя плитками в ряд
+   умещается в одну строку. */
+.drawer .side-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.drawer .side-stats .side-title { grid-column: 1 / -1; }
+
+/* display: contents делает обёртку «прозрачной»: в сетку попадают
+   сами плитки, а не их контейнер. */
+.drawer .side-stats .stat-tiles { display: contents; }
+
+.drawer .side-stats .stat {
+  padding: 9px 8px;
+  text-align: center;
+}
+
+.drawer .side-stats .stat b { font-size: 16px; }
+.drawer .side-stats .stat span { font-size: 10.5px; line-height: 1.3; }
+
+/* Группы стоят плотнее — панель становится короче на добрую сотню пикселей */
+.drawer .side-group + .side-group { margin-top: 16px; }
+.drawer .side-title { margin-bottom: 5px; }
+
+
+/* ============================================================
+   Мелочи, из которых складывается «сделано аккуратно»
+   ============================================================ */
+
+/* ---------- Видимый фокус с клавиатуры ---------- */
+
+/* :focus-visible, а не :focus — браузер сам решает, показывать ли рамку.
+   При клике мышью её не будет, при переходе по Tab будет. Раньше поля
+   глушили обводку начисто (outline: none), и человек, идущий по сайту
+   с клавиатуры, просто терял себя на странице. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.search input:focus-visible,
+.field input:focus-visible,
+.field textarea:focus-visible,
+.palette-input:focus-visible,
+.select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* ---------- Выделение текста ---------- */
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+/* ---------- Полосы прокрутки ---------- */
+
+/* Тонкие и в цвет темы. Системная полоса в тёмной теме остаётся светлой
+   и режет глаз белой лентой у края экрана. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover { background: var(--muted); background-clip: content-box; }
+
+/* ---------- Название книги под обложкой ---------- */
+
+.book-meta .t {
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: color .14s, text-decoration-color .14s;
+}
+
+.book-meta .t:hover { text-decoration-color: currentColor; }
+
+/* ---------- Плавная прокрутка по якорям ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+
+/* ============================================================
+   Шапка: всё одной высоты
+   ------------------------------------------------------------
+   На планшете правый угол разъезжался: «+ Книга» переносилась на две
+   строки и вырастала, у «Заказов» была своя высота, у переключателя
+   языка — своя. Один общий рост чинит это раз и навсегда.
+   ============================================================ */
+
+:root { --control-h: 36px; }
+
+.header-actions .ghost-btn,
+.header-actions .primary-btn.small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--control-h);
+  padding: 0 14px;
+  /* Главная причина разнобоя: «+ Книга» переносилась по пробелу. */
+  white-space: nowrap;
+}
+
+.header-actions .icon-btn {
+  width: var(--control-h);
+  height: var(--control-h);
+  flex: none;
+}
+
+.header-actions .lang-switch,
+.header-actions .user-box {
+  height: var(--control-h);
+  align-items: center;
+}
+
+.header-actions .lang-switch { padding: 3px; }
+.header-actions .lang-switch button { height: 100%; font-size: 11.5px; }
+.header-actions .avatar { width: 26px; height: 26px; font-size: 11.5px; }
+.header-actions .logout-btn { width: 26px; height: 26px; }
+
+
+/* ============================================================
+   Разделы каталога: «Продолжить чтение» и «Вся библиотека»
+   ============================================================ */
+
+/* Раньше два раздела отличались только строчкой подписи и сливались
+   в одну бесконечную ленту обложек. Линия, уходящая в прозрачность,
+   отбивает раздел от раздела, не утяжеляя страницу рамками. */
+.shelf-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 14px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.shelf-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--border), transparent);
+}
+
+/* ---------- Процент на обложке ---------- */
+
+.cover-badge {
+  position: absolute;
+  left: 7px;
+  bottom: 9px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .55);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+
+/* (блок «Телефон и планшет: каталог» удалён: он дублировал правила выше
+   и, будучи ниже по файлу, побеждал — из-за него счётчик улетал к правому
+   краю, а панель фильтров вставала посреди пустой строки) */
+
+/* ---------- Телефон: мельче обложки, плотнее каталог ---------- */
+
+@media (max-width: 620px) {
+  /* Три колонки вместо двух. Шестьдесят книг по две в ряд — тридцать
+     экранов прокрутки; по три — двадцать, и обложка всё ещё узнаётся. */
+  .book-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px 10px;
+  }
+
+  .book-meta { padding-top: 7px; }
+  .book-meta .t { font-size: 12.5px; line-height: 1.3; }
+  .book-meta .a { font-size: 11px; }
+  .facts-row { font-size: 11px; gap: 6px; }
+
+  /* На колонке в сто пикселей жанры не читаются и ломают ряд по высоте.
+     В ленте то же самое: у одной книги один жанр, у другой два, и карточки
+     выходят разной высоты. */
+  .cats { display: none; }
+
+  /* ---------- Одна строка на любом телефоне ---------- */
+
+  /* Ширину селекта задавал самый длинный пункт списка — «Сначала короткие».
+     Из-за этого на 440 пикселях строка складывалась целиком, а на 390 —
+     переносилась: два телефона выглядели по-разному без всякой причины.
+     Ограничиваем ширину, и поведение становится одинаковым. */
+  .toolbar { flex-wrap: nowrap; gap: 8px; }
+  .toolbar-title { flex: 1; min-width: 0; }
+  .toolbar-title h1 { font-size: 19px; }
+  .toolbar-tools { flex: none; }
+  .toolbar-tools .select { max-width: 132px; font-size: 13px; }
+
+  .cover-badge { left: 5px; bottom: 6px; padding: 2px 6px; font-size: 10px; }
+
+  /* Чуть крупнее карточек каталога (там 3 колонки, около 104 px):
+     полка «Продолжить» должна читаться как выделенная, а не как часть сетки. */
+  .shelf .book-card { flex: 0 0 118px; }
+  .shelf .book-grid { margin: 0 -12px; padding: 2px 12px 16px; }
+}
+
+/* Совсем узкие телефоны: три колонки уже не читаются */
+@media (max-width: 380px) {
+  .toolbar-title h1 { font-size: 18px; }
+  .toolbar-tools .select { max-width: 112px; }
+}
+
+@media (max-width: 360px) {
+  .book-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+
+/* ============================================================
+   Низ выдвижной панели: язык, тема, аккаунт
+   ============================================================ */
+
+/* Переключатель языка во всю ширину выглядел как главный элемент панели,
+   хотя меняют язык раз в жизни. Прижимаем его к левому краю и даём ровно
+   столько места, сколько нужно трём парам букв. */
+.drawer .lang-switch {
+  width: auto;
+  justify-self: start;
+  height: 38px;
+  padding: 3px;
+  gap: 1px;
+}
+
+.drawer .lang-switch button {
+  height: 100%;
+  padding: 0 13px;
+  font-size: 12px;
+  letter-spacing: .06em;
+}
+
+.drawer .icon-btn[data-theme-toggle] {
+  width: 38px;
+  height: 38px;
+  justify-self: end;
+}
+
+.drawer .header-actions .ghost-btn { height: 42px; }
+
+/* ---------- Аккаунт ---------- */
+
+/* Кнопка «Выйти» стояла впритык к кружку, а справа тянулась пустота:
+   имя пользователя пряталось правилом из шапки. Теперь имя занимает
+   всё свободное место, а выход прижат к правому краю. */
+.drawer .user-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 8px 8px 8px 10px;
+  border-radius: 12px;
+  background: var(--surface-alt);
+}
+
+.drawer .user-box .avatar { width: 32px; height: 32px; font-size: 13px; }
+
+.drawer .user-box .user-name {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 15px;
+}
+
+.drawer .logout-form { width: auto; margin-left: auto; }
+
+.drawer .logout-btn {
+  width: auto;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.drawer .logout-btn:hover { border-color: #b23b32; color: #b23b32; background: var(--surface); }
+
+
+/* ============================================================
+   Быстрые полки лентой (только узкие экраны)
+   ============================================================ */
+
+/* Там, где сайдбар на виду, эти же фильтры уже есть — второй раз ни к чему */
+.quick-shelves { display: none; }
+
+@media (max-width: 900px) {
+  .quick-shelves {
+    display: flex;
+    gap: 7px;
+    /* Лента уходит под края экрана: видно, что её можно пролистать */
+    margin: 0 -14px 16px;
+    padding: 1px 14px 3px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .quick-shelves::-webkit-scrollbar { display: none; }
+
+  .qs {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 13px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: border-color .13s, color .13s;
+  }
+
+  .qs b { font-size: 11px; font-weight: 700; opacity: .65; }
+
+  .qs.on {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .qs.on b { opacity: .9; }
+}
+
+@media (max-width: 620px) {
+  .quick-shelves { margin: 0 -12px 14px; padding: 1px 12px 3px; }
+}
+
+/* ============================================================
+   Планшет: поиск по центру и поменьше
+   ============================================================ */
+
+/* (центровку поиска теперь держит сетка шапки — см. выше) */

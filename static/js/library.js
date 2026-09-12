@@ -4,7 +4,10 @@
 
   // --- Вид: сетка или список -------------------------------------------
 
-  const grids = document.querySelectorAll('.book-grid');
+  // Только основная сетка. Полка «Продолжить чтение» на телефоне —
+  // горизонтальная лента, и превращать её в список незачем: это другой
+  // по смыслу блок, а не часть каталога.
+  const grids = document.querySelectorAll('.book-grid[data-books]');
   const switches = document.querySelectorAll('[data-view]');
 
   function applyView(view) {
